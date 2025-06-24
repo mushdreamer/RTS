@@ -39,6 +39,15 @@ public class EventDirector : MonoBehaviour
 
     private void Start()
     {
+        // 在这里加入这行调试代码！
+        /*Debug.Log($"当前计时器: {timer}");
+
+        timer -= Time.deltaTime;
+        if (timer <= 0)
+        {
+            TryTriggerEvent();
+            ResetTimer();
+        }*/
         ResetTimer();
     }
 
