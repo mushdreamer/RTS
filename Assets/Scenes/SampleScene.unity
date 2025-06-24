@@ -1455,6 +1455,56 @@ MonoBehaviour:
   m_LightCookieSize: {x: 1, y: 1}
   m_LightCookieOffset: {x: 0, y: 0}
   m_SoftShadowQuality: 1
+--- !u!1 &563033270
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 563033272}
+  - component: {fileID: 563033271}
+  m_Layer: 0
+  m_Name: EventDirector
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &563033271
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563033270}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b2211dfb266e0da499c75fe36909fd7d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  allEvents:
+  - {fileID: 11400000, guid: 682a5ac677449884cbca74488e9c5500, type: 2}
+  minTimeBetweenEvents: 20
+  maxTimeBetweenEvents: 60
+  currentGameDay: 1
+  playerPopulation: 3
+--- !u!4 &563033272
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 563033270}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 32.24148, y: -3.001649, z: 22.78876}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &581041278
 GameObject:
   m_ObjectHideFlags: 0
@@ -6004,6 +6054,7 @@ SceneRoots:
   - {fileID: 401350753}
   - {fileID: 926031272}
   - {fileID: 1611420274}
+  - {fileID: 563033272}
   - {fileID: 1459792220}
   - {fileID: 543450652726869583}
   - {fileID: 1298406016}
