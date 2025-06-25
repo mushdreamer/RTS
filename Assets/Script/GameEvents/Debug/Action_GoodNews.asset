@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 723171e23a7f27c479a5c5b031e2256b, type: 3}
   m_Name: Action_GoodNews
   m_EditorClassIdentifier: 
-  message: "\u4F60\u611F\u5230\u8FD0\u6C14\u4E0D\u9519\u3002"
+  message: You are lucky in next minute

@@ -2,6 +2,7 @@
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
+using System;
 
 public class EventDirector : MonoBehaviour
 {
@@ -23,6 +24,17 @@ public class EventDirector : MonoBehaviour
     // ... 在这里添加更多你需要追踪的游戏状态
 
     private float timer;
+
+    // --- 2. 添加这两个公共静态事件 ---
+    /// <summary>
+    /// 当计时器更新时触发，广播剩余时间
+    /// </summary>
+    public static event Action<float> OnTimerUpdated;
+
+    /// <summary>
+    /// 当一个事件被选中并触发时，广播这个事件的数据
+    /// </summary>
+    public static event Action<GameEvent> OnEventTriggered;
 
     private void Awake()
     {
@@ -54,6 +66,11 @@ public class EventDirector : MonoBehaviour
     private void Update()
     {
         timer -= Time.deltaTime;
+
+        // --- 3. 在Update中广播计时器更新事件 ---
+        OnTimerUpdated?.Invoke(timer);
+        // ------------------------------------
+
         if (timer <= 0)
         {
             TryTriggerEvent();
@@ -63,13 +80,13 @@ public class EventDirector : MonoBehaviour
 
     private void ResetTimer()
     {
-        timer = Random.Range(minTimeBetweenEvents, maxTimeBetweenEvents);
+        timer = UnityEngine.Random.Range(minTimeBetweenEvents, maxTimeBetweenEvents);
         Debug.Log($"下次事件将在大约 {Mathf.RoundToInt(timer)} 秒后尝试触发。");
     }
 
     public void TryTriggerEvent()
     {
-        // 1. 筛选出所有当前条件满足的事件
+        // ... (筛选和加权随机选择的代码保持不变) ...
         List<GameEvent> validEvents = allEvents.Where(e => e.AreConditionsMet(this)).ToList();
 
         if (validEvents.Count == 0)
@@ -78,11 +95,8 @@ public class EventDirector : MonoBehaviour
             return;
         }
 
-        // 2. 根据权重计算总权重
         float totalWeight = validEvents.Sum(e => e.baseWeight);
-
-        // 3. 进行加权随机选择
-        float randomPoint = Random.Range(0, totalWeight);
+        float randomPoint = UnityEngine.Random.Range(0, totalWeight);
         GameEvent chosenEvent = null;
 
         foreach (var e in validEvents)
@@ -95,9 +109,14 @@ public class EventDirector : MonoBehaviour
             randomPoint -= e.baseWeight;
         }
 
-        // 4. 执行选中的事件
+
         if (chosenEvent != null)
         {
+            // --- 4. 在执行事件前，广播事件触发信息 ---
+            OnEventTriggered?.Invoke(chosenEvent);
+            // ----------------------------------------
+
+            // 然后再执行事件本身
             chosenEvent.Execute();
         }
     }
