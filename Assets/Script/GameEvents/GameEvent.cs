@@ -5,23 +5,23 @@ using UnityEngine;
 [CreateAssetMenu(fileName = "NewGameEvent", menuName = "Game Event System/Game Event", order = 1)]
 public class GameEvent : ScriptableObject
 {
-    [Header("基本信息")]
+    [Header("Basic Information")]
     public string eventName;
     [TextArea(3, 5)]
     public string description;
 
-    [Header("触发条件")]
-    [Tooltip("事件可以发生的最小游戏天数")]
+    [Header("Trigger Conditions")]
+    [Tooltip("Minimum number of in-game days before the event can occur")]
     public int minGameDays = 0;
-    [Tooltip("事件可以发生的最大游戏天数（0表示无限制）")]
+    [Tooltip("Maximum number of in-game days the event can occur (0 means no limit)")]
     public int maxGameDays = 0;
 
-    [Header("触发权重")]
-    [Tooltip("事件的基础权重，权重越高的事件越容易被选中")]
+    [Header("Trigger Weight")]
+    [Tooltip("Base weight of the event — higher weight increases the chance of being selected")]
     public float baseWeight = 10f;
 
-    [Header("事件效果")]
-    [Tooltip("当事件触发时要执行的动作")]
+    [Header("Event Effects")]
+    [Tooltip("Actions to perform when the event is triggered")]
     public GameEventAction[] actions;
 
     /// <summary>

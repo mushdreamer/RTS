@@ -5,12 +5,12 @@ using System.Collections;
 
 public class EventUIManager : MonoBehaviour
 {
-    [Header("UI元素链接")]
+    [Header("UI Element")]
     public TextMeshProUGUI timerText;
     public GameObject eventNotificationPanel;
     public TextMeshProUGUI eventDescriptionText;
 
-    [Header("通知显示时间")]
+    [Header("Notification Display Time")]
     public float notificationDisplayTime = 5f; // 事件通知显示5秒
 
     // 在对象启用时，开始“收听”广播

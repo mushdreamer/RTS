@@ -8,17 +8,17 @@ public class EventDirector : MonoBehaviour
 {
     public static EventDirector Instance;
 
-    [Header("事件库")]
-    [Tooltip("所有可能发生的游戏事件列表")]
+    [Header("Event Library")]
+    [Tooltip("List of all possible game events")]
     public List<GameEvent> allEvents;
 
-    [Header("触发时机")]
-    [Tooltip("下次尝试触发事件的最小间隔（秒）")]
+    [Header("Trigger Timing")]
+    [Tooltip("Minimum interval (in seconds) before trying to trigger the next event")]
     public float minTimeBetweenEvents = 20f;
-    [Tooltip("下次尝试触发事件的最大间隔（秒）")]
+    [Tooltip("Maximum interval (in seconds) before trying to trigger the next event")]
     public float maxTimeBetweenEvents = 60f;
 
-    [Header("当前游戏状态 (示例)")]
+    [Header("Current Game State (Example)")]
     public int currentGameDay = 1; // 游戏进行的天数
     public int playerPopulation = 3; // 玩家人口
     // ... 在这里添加更多你需要追踪的游戏状态
@@ -81,7 +81,7 @@ public class EventDirector : MonoBehaviour
     private void ResetTimer()
     {
         timer = UnityEngine.Random.Range(minTimeBetweenEvents, maxTimeBetweenEvents);
-        Debug.Log($"下次事件将在大约 {Mathf.RoundToInt(timer)} 秒后尝试触发。");
+        Debug.Log($"Next event will be triggered after {Mathf.RoundToInt(timer)} seconds");
     }
 
     public void TryTriggerEvent()
