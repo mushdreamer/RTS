@@ -47,7 +47,7 @@ public class GameEvent : ScriptableObject
     /// </summary>
     public void Execute()
     {
-        Debug.Log($"ÊÂ¼þ´¥·¢: [{eventName}] - {description}");
+        Debug.Log($"Event Triggered: [{eventName}] - {description}");
         foreach (var action in actions)
         {
             action.Execute();

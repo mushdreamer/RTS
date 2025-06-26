@@ -91,7 +91,7 @@ public class EventDirector : MonoBehaviour
 
         if (validEvents.Count == 0)
         {
-            Debug.Log("没有满足条件的事件可以触发。");
+            Debug.Log("No Event Condition!");
             return;
         }
 
