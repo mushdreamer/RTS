@@ -797,10 +797,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   constMaxHealth: 100
   healthTracker: {fileID: 457185018619062850}
-  isEnemy: 1
+  isEnemy: 0
   buildingType: 1
   buildPosition: {x: 0, y: 0, z: 0}
   inPreviewMode: 1
+  destructionEffectPrefab: {fileID: 0}
 --- !u!65 &-1144176008808255896
 BoxCollider:
   m_ObjectHideFlags: 0

@@ -23,6 +23,10 @@ public class Constructable : MonoBehaviour, IDamageable
 
     public bool inPreviewMode;
 
+    // <<< 1. 在这里添加一个公共变量，用于链接破坏特效的Prefab >>>
+    [Header("Effects")]
+    public GameObject destructionEffectPrefab;
+
     private void Start()
     {
         constHealth = constMaxHealth;
@@ -38,6 +42,13 @@ public class Constructable : MonoBehaviour, IDamageable
             ResourceManager.Instance.UpdateBuildingChanged(buildingType, false, buildPosition);
 
             SoundManager.Instance.PlayBuildingDestructionSound();//future when we have more sounds //SoundManager.Instance.PlayBuildingDestructionSound(buildingType);
+
+            // <<< 2. 在销毁对象前，实例化破坏特效 >>>
+            if (destructionEffectPrefab != null)
+            {
+                Instantiate(destructionEffectPrefab, transform.position, transform.rotation);
+            }
+            // <<< ----------------------------------- >>>
 
             Destroy(gameObject);
         }
@@ -58,6 +69,8 @@ public class Constructable : MonoBehaviour, IDamageable
     public void TakeDamage(int damage)
     {
         constHealth -= damage;
+        // --- Add this English diagnostic line! ---
+        Debug.Log($"[DIAGNOSTIC] {name} took {damage} damage. Health remaining: {constHealth} / {constMaxHealth}");
         UpdateHealthUI();
     }
 
