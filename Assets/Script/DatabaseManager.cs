@@ -19,7 +19,7 @@ public class DatabaseManager : MonoBehaviour
     }
 
     //Object Database
-    public ObjectsDatabseSO databseSO;
+    public ObjectsDatabseSO databaseSO;
 
     //Other Database
 }

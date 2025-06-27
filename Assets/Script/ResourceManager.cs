@@ -1,5 +1,5 @@
+// ResourceManager.cs - 已修正版本
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using TMPro;
 using UnityEngine;
@@ -20,20 +20,23 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
+    // --- 信用点（Credits）管理 ---
     private int credits = 60;
-
-    public event Action OnResourceChanged;
-    public event Action OnBuildingsChanged;
-
     public TextMeshProUGUI creditsUI;
-
-    public List<BuildingType> allExistingBuildings;
-
-    public PlacementSystem placementSystem;
     public enum ResourcesType
     {
         Credits
     }
+
+    // --- Anno风格的物品库存 ---
+    private Dictionary<ItemData, float> _itemStock = new Dictionary<ItemData, float>();
+
+    // --- 事件和系统引用 ---
+    public event Action OnResourceChanged;
+    public event Action OnBuildingsChanged;
+    public List<BuildingType> allExistingBuildings;
+    public PlacementSystem placementSystem;
+
     private void Start()
     {
         UpdateUI();
@@ -44,7 +47,6 @@ public class ResourceManager : MonoBehaviour
         if (isNew)
         {
             allExistingBuildings.Add(buildingType);
-
             SoundManager.Instance.PlayBuildingConstructionSound();
         }
         else
@@ -52,59 +54,91 @@ public class ResourceManager : MonoBehaviour
             placementSystem.RemovePlacementData(position);
             allExistingBuildings.Remove(buildingType);
         }
-
         OnBuildingsChanged?.Invoke();
-    }
-
-    public void IncreaseResource(ResourcesType resource, int amountToIncrease)
-    {
-        switch (resource)
-        {
-            case ResourcesType.Credits:
-                credits += amountToIncrease;
-                break;
-            default:
-                break;
-        }
-
-        OnResourceChanged?.Invoke();
-    }
-    public void DecreaseResource(ResourcesType resource, int amountToDecrease)
-    {
-        switch (resource)
-        {
-            case ResourcesType.Credits:
-                credits -= amountToDecrease;
-                break;
-            default:
-                break;
-        }
-
-        OnResourceChanged?.Invoke();
     }
 
     public void SellBuilding(BuildingType buildingType)
     {
         SoundManager.Instance.PlayBuildingSellingSound();
-
         var sellingPrice = 0;
-        foreach (ObjectData obj in DatabaseManager.Instance.databseSO.objectsData)
+        foreach (ObjectData obj in DatabaseManager.Instance.databaseSO.objectsData)
         {
             if (obj.thisBuildingType == buildingType)
             {
-                foreach (BuildRequirement req in obj.resourceRequirements)
-                {
-                    if (req.resource == ResourcesType.Credits)
-                    {
-                        sellingPrice = req.amount;
-                    }
-                }
+                // --- 修改点 1 ---
+                // 不再需要遍历resourceRequirements来找价格，直接读取creditCost
+                sellingPrice = obj.creditCost;
+                break; // 找到对应的建筑后就可以跳出循环
             }
         }
-
         int amountToReturn = (int)(sellingPrice * 0.50f);
-
         IncreaseResource(ResourcesType.Credits, amountToReturn);
+
+        // (可选) 未来你也可以在这里添加返还部分建造物资的逻辑
+    }
+
+    // 这个方法在建筑被成功放置后调用，用来扣除资源
+    internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
+    {
+        // --- 修改点 2 ---
+        // 分别扣除信用点和物资
+
+        // 1. 扣除信用点
+        DecreaseResource(ResourcesType.Credits, objectData.creditCost);
+
+        // 2. 扣除物资
+        foreach (BuildRequirement req in objectData.materialRequirements)
+        {
+            // 这里我们用TryConsume，因为它更安全。
+            // 理论上此时资源一定是足够的，因为BuySlot已经检查过了。
+            TryConsumeWarehouseItem(req.item, req.amount);
+        }
+    }
+
+    public void IncreaseResource(ResourcesType resource, int amountToIncrease)
+    {
+        if (resource == ResourcesType.Credits)
+        {
+            credits += amountToIncrease;
+            OnResourceChanged?.Invoke();
+        }
+    }
+    public void DecreaseResource(ResourcesType resource, int amountToDecrease)
+    {
+        if (resource == ResourcesType.Credits)
+        {
+            credits -= amountToDecrease;
+            OnResourceChanged?.Invoke();
+        }
+    }
+
+    public void AddWarehouseItem(ItemData item, float amount)
+    {
+        if (_itemStock.ContainsKey(item))
+        {
+            _itemStock[item] += amount;
+        }
+        else
+        {
+            _itemStock.Add(item, amount);
+        }
+        OnResourceChanged?.Invoke();
+    }
+
+    public bool TryConsumeWarehouseItem(ItemData item, float amount)
+    {
+        if (_itemStock.ContainsKey(item) && _itemStock[item] >= amount)
+        {
+            _itemStock[item] -= amount;
+            OnResourceChanged?.Invoke();
+            return true;
+        }
+        return false;
+    }
+
+    public float GetWarehouseStock(ItemData item)
+    {
+        return _itemStock.ContainsKey(item) ? _itemStock[item] : 0;
     }
 
     private void UpdateUI()
@@ -115,27 +149,6 @@ public class ResourceManager : MonoBehaviour
     public int GetCredits()
     {
         return credits;
-    }
-
-    internal int GetResourceAmount(ResourcesType resource)
-    {
-        switch (resource)
-        {
-            case ResourcesType.Credits:
-                return credits;
-            default:
-                break;
-        }
-
-        return 0;
-    }
-
-    internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
-    {
-        foreach (BuildRequirement req in objectData.resourceRequirements)
-        {
-            DecreaseResource(req.resource, req.amount);
-        }
     }
 
     private void OnEnable()

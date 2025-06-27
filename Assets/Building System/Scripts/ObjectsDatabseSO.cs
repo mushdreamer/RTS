@@ -53,7 +53,10 @@ public class ObjectData
     public GameObject Prefab { get; private set; }
 
     [field: SerializeField]
-    public List<BuildRequirement> resourceRequirements { get; private set; }
+    public int creditCost { get; private set; } // 1. 明确的金钱成本
+
+    [field: SerializeField]
+    public List<BuildRequirement> materialRequirements { get; private set; } // 2. 将原来的resourceRequirements改名为materialRequirements
 
     [field: SerializeField]
     public List<BuildingType> buildDependency { get; private set; }
@@ -67,7 +70,7 @@ public class ObjectData
 [System.Serializable]
 public class BuildRequirement
 {
-    public ResourceManager.ResourcesType resource;
+    public ItemData item; // 3. 不再使用枚举，而是直接引用ItemData
     public int amount;
 }
 

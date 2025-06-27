@@ -1,6 +1,5 @@
+// BuySlot.cs - 已修正版本
 using System;
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 
@@ -17,7 +16,6 @@ public class BuySlot : MonoBehaviour
 
     private void Start()
     {
-        //Subscribe to event / Listening to event
         ResourceManager.Instance.OnResourceChanged += HandleResourcesChanged;
         HandleResourcesChanged();
 
@@ -35,8 +33,11 @@ public class BuySlot : MonoBehaviour
 
     private void OnDestroy()
     {
-        ResourceManager.Instance.OnResourceChanged -= HandleResourcesChanged;
-        ResourceManager.Instance.OnBuildingsChanged -= HandleBuildingsChanged;
+        if (ResourceManager.Instance != null)
+        {
+            ResourceManager.Instance.OnResourceChanged -= HandleResourcesChanged;
+            ResourceManager.Instance.OnBuildingsChanged -= HandleBuildingsChanged;
+        }
     }
 
     private void UpdateAvailabilityUI()
@@ -53,48 +54,56 @@ public class BuySlot : MonoBehaviour
         }
     }
 
+    // --- 修改点 3：完全重写此方法 ---
     private void HandleResourcesChanged()
     {
-        ObjectData objectData = DatabaseManager.Instance.databseSO.objectsData[databaseItemID];
+        ObjectData objectData = DatabaseManager.Instance.databaseSO.objectsData[databaseItemID];
 
-        bool requirementMet = true;
+        bool requirementsMet = true;
 
-        foreach (BuildRequirement req in objectData.resourceRequirements)
+        // 1. 检查信用点（Credits）是否足够
+        if (ResourceManager.Instance.GetCredits() < objectData.creditCost)
         {
-            if (ResourceManager.Instance.GetResourceAmount(req.resource) < req.amount)
+            requirementsMet = false;
+        }
+        else
+        {
+            // 2. 如果信用点足够，再逐一检查每种物资（Materials）
+            foreach (BuildRequirement req in objectData.materialRequirements)
             {
-                requirementMet = false;
-                break;
+                // 使用我们新的仓库查询方法！
+                if (ResourceManager.Instance.GetWarehouseStock(req.item) < req.amount)
+                {
+                    requirementsMet = false;
+                    break; // 一旦有任何一种物资不足，就立刻停止检查
+                }
             }
         }
 
-        isAvailable = requirementMet;
+        isAvailable = requirementsMet;
 
         UpdateAvailabilityUI();
     }
 
     private void HandleBuildingsChanged()
     {
-        ObjectData objectData = DatabaseManager.Instance.databseSO.objectsData[databaseItemID];
+        ObjectData objectData = DatabaseManager.Instance.databaseSO.objectsData[databaseItemID];
 
         foreach (BuildingType dependency in objectData.buildDependency)
         {
-            // if the building has not dependencies
             if (dependency == BuildingType.None)
             {
                 gameObject.SetActive(true);
                 return;
             }
 
-            // check if dependency exists
-            if (!ResourceManager.Instance.allExistingBuildings.Contains(dependency))
+            if (ResourceManager.Instance.allExistingBuildings != null && !ResourceManager.Instance.allExistingBuildings.Contains(dependency))
             {
                 gameObject.SetActive(false);
                 return;
             }
         }
 
-        // if all requirements are met
         gameObject.SetActive(true);
     }
 }

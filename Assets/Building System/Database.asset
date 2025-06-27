@@ -20,9 +20,8 @@ MonoBehaviour:
     <Size>k__BackingField: {x: 3, y: 3}
     <Prefab>k__BackingField: {fileID: 8527331939346141501, guid: f419cdde55f62f4419e12757ed661eb5,
       type: 3}
-    <resourceRequirements>k__BackingField:
-    - resource: 0
-      amount: 10
+    <creditCost>k__BackingField: 10
+    <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 00000000
     <benefits>k__BackingField: []
   - <Name>k__BackingField: PowerPlant
@@ -32,8 +31,7 @@ MonoBehaviour:
     <Size>k__BackingField: {x: 2, y: 2}
     <Prefab>k__BackingField: {fileID: 6894239926297190709, guid: ba6244778a8aad542abb534feb299990,
       type: 3}
-    <resourceRequirements>k__BackingField:
-    - resource: 0
-      amount: 5
+    <creditCost>k__BackingField: 5
+    <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 01000000
     <benefits>k__BackingField: []
