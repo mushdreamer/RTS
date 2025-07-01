@@ -77,7 +77,7 @@ public class SoundManager : MonoBehaviour
     }
     public void PlayBuildingConstructionSound()
     {
-        Debug.Log("PlayBuildingConstructionSound");
+        //Debug.Log("PlayBuildingConstructionSound");
         constructionBuildingChannelPool[constructionCurrentPoolIndex].PlayOneShot(buildingConstructionSound);
 
         unitCurrentPoolIndex = (constructionCurrentPoolIndex + 1) % poolSize;

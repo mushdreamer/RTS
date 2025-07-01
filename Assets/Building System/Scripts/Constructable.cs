@@ -70,7 +70,7 @@ public class Constructable : MonoBehaviour, IDamageable
     {
         constHealth -= damage;
         // --- Add this English diagnostic line! ---
-        Debug.Log($"[DIAGNOSTIC] {name} took {damage} damage. Health remaining: {constHealth} / {constMaxHealth}");
+        //Debug.Log($"[DIAGNOSTIC] {name} took {damage} damage. Health remaining: {constHealth} / {constMaxHealth}");
         UpdateHealthUI();
     }
 
@@ -82,6 +82,11 @@ public class Constructable : MonoBehaviour, IDamageable
 
         healthTracker.gameObject.SetActive(true);
         ActivateObstacle();
+
+        // <<< 在这里添加以下代码 >>>
+        // 尝试获取这个对象上的 House 组件，如果存在，就调用它的 ActivateHouse 方法
+        GetComponent<House>()?.ActivateHouse();
+        // <<< --------------------- >>>
 
         if (isEnemy)
         {

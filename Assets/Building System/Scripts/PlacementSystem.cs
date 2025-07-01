@@ -35,11 +35,11 @@ public class PlacementSystem : MonoBehaviour
 
     public void StartPlacement(int ID)
     {
-        Debug.Log("Should Start Placement");
+        //Debug.Log("Should Start Placement");
 
         selectedID = ID;
 
-        Debug.Log("Placement ID: " + ID);
+        //Debug.Log("Placement ID: " + ID);
 
 
         StopPlacement();

@@ -35,3 +35,14 @@ MonoBehaviour:
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 01000000
     <benefits>k__BackingField: []
+  - <Name>k__BackingField: House
+    <ID>k__BackingField: 2
+    <thisBuildingType>k__BackingField: 0
+    description: 
+    <Size>k__BackingField: {x: 1, y: 1}
+    <Prefab>k__BackingField: {fileID: 2864364775371756474, guid: e9e6f63eaa636144b86dbb46ff470367,
+      type: 3}
+    <creditCost>k__BackingField: 2
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 01000000
+    <benefits>k__BackingField: []

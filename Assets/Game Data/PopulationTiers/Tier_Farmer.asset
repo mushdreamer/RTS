@@ -16,7 +16,7 @@ MonoBehaviour:
   residentsPerHouse: 10
   needs:
   - item: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
-    consumptionPerMinute: 0.05
+    consumptionPerMinute: 30
     isLuxuryNeed: 0
   nextTier: {fileID: 0}
   upgradeMaterials: []
