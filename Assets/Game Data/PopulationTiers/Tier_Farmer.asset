@@ -18,5 +18,7 @@ MonoBehaviour:
   - item: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
     consumptionPerMinute: 30
     isLuxuryNeed: 0
-  nextTier: {fileID: 0}
-  upgradeMaterials: []
+  nextTier: {fileID: 11400000, guid: e293eb043ad073f4d987af98102f74c7, type: 2}
+  upgradeMaterials:
+  - item: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
+    amount: 20

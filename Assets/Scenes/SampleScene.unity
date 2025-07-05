@@ -898,6 +898,8 @@ MonoBehaviour:
   creditsUI: {fileID: 1503583755}
   allExistingBuildings: 
   placementSystem: {fileID: 1604156578}
+  debugFishData: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
+  debugWoodData: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
 --- !u!114 &401350755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1044,7 +1046,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!114 &563033271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2812,6 +2814,7 @@ MonoBehaviour:
   gameStatusText: {fileID: 1114840073}
   farmerTier: {fileID: 11400000, guid: ed990e90840912a4e8042973433c6b91, type: 2}
   fishData: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
+  woodData: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
 --- !u!4 &1117056785
 Transform:
   m_ObjectHideFlags: 0

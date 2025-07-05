@@ -160,29 +160,38 @@ public class ResourceManager : MonoBehaviour
         OnResourceChanged -= UpdateUI;
     }
 
+    [Header("调试用的物品")]
+    public ItemData debugFishData;
+    public ItemData debugWoodData;
     void Update()
     {
-        // 按下 F 键用于测试
+        // 按下 F 键，增加 10 单位的鱼
         if (Input.GetKeyDown(KeyCode.F))
         {
-            // 1. 从 Resources 文件夹中，根据路径加载 "Item_Fish" 资产
-            // 注意：路径是相对于 Resources 文件夹的，不需要写 "Assets/Resources/"
-            // 也不需要写文件后缀 ".asset"
-            ItemData fishData = Resources.Load<ItemData>("GameData/Items/Item_Fish");
-
-            // 2. 添加一个健壮性检查，确保我们成功加载到了东西
-            if (fishData == null)
+            // 我们不再使用Resources.Load，直接使用在Inspector里设置好的公共变量
+            if (debugFishData != null)
             {
-                Debug.LogError("加载 'Item_Fish' 失败! " +
-                               "请确认：\n1. 文件路径是否为 'Assets/Resources/GameData/Items/Item_Fish.asset' " +
-                               "\n2. 路径字符串 'GameData/Items/Item_Fish' 是否拼写正确。");
-                return; // 如果加载失败，直接返回，不执行后续代码
+                AddWarehouseItem(debugFishData, 10);
+                Debug.Log($"调试：手动增加了10单位的【{debugFishData.itemName}】!");
             }
+            else
+            {
+                Debug.LogWarning("调试失败：请在ResourceManager的Inspector面板中设置'Debug Fish Data'!");
+            }
+        }
 
-            // 3. 如果加载成功，才执行添加操作
-            AddWarehouseItem(fishData, 10);
-
-            Debug.Log($"调试：通过代码加载并成功增加了10单位的【{fishData.itemName}】!");
+        // 按下 W 键 (Wood)，增加 10 单位的木材
+        if (Input.GetKeyDown(KeyCode.W))
+        {
+            if (debugWoodData != null)
+            {
+                AddWarehouseItem(debugWoodData, 10);
+                Debug.Log($"调试：手动增加了10单位的【{debugWoodData.itemName}】!");
+            }
+            else
+            {
+                Debug.LogWarning("调试失败：请在ResourceManager的Inspector面板中设置'Debug Wood Data'!");
+            }
         }
     }
 }
