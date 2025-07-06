@@ -61,27 +61,51 @@ public class House : MonoBehaviour
     // <<< 新增：检查是否满足升级条件的方法 >>>
     public bool CanUpgrade()
     {
-        if (currentTier.nextTier == null) return false; // 没有下一级，不能升级
-        if (currentHappiness < currentTier.HappinessToUpgrade) return false; // 幸福度不够
+        // 条件1：检查是否存在下一级
+        if (currentTier.nextTier == null)
+        {
+            Debug.Log("检查升级失败：当前阶层 '" + currentTier.tierName + "' 没有下一级可供升级。");
+            return false;
+        }
 
-        // 检查材料是否足够
+        // 条件2：检查幸福度是否达标
+        if (currentHappiness < currentTier.HappinessToUpgrade)
+        {
+            // 使用富文本让关键数字更显眼
+            Debug.Log($"检查升级失败：幸福度不足。需要: <b>{currentTier.HappinessToUpgrade}</b>, 当前: <b>{currentHappiness}</b>");
+            return false;
+        }
+
+        // 条件3：检查升级材料是否足够
         foreach (var material in currentTier.upgradeMaterials)
         {
-            if (ResourceManager.Instance.GetWarehouseStock(material.item) < material.amount)
+            // 确保 material.item 不为空，避免潜在的错误
+            if (material.item == null)
             {
-                //Debug.Log($"升级失败：缺少材料 {material.item.itemName}");
-                return false; // 材料不足
+                Debug.LogError("数据错误：升级材料中有一个物品(ItemData)是空的！");
+                continue;
+            }
+
+            float stock = ResourceManager.Instance.GetWarehouseStock(material.item);
+            if (stock < material.amount)
+            {
+                Debug.LogWarning($"检查升级失败：缺少材料 <b>{material.item.itemName}</b>。需要: {material.amount}, 当前库存: {stock:F0}");
+                return false;
             }
         }
+
+        // 如果所有检查都通过了
+        Debug.Log("<color=green>所有升级条件均已满足！可以升级！</color>");
         return true;
     }
 
     // <<< 新增：尝试执行升级的方法 >>>
     public void TryToUpgrade()
     {
+        // 现在这个方法只负责调用检查，如果CanUpgrade返回false，它什么也不做。
+        // 所有的失败日志都由CanUpgrade自己来打印。
         if (!CanUpgrade())
         {
-            Debug.Log("升级条件未满足！");
             return;
         }
 
@@ -91,19 +115,19 @@ public class House : MonoBehaviour
             ResourceManager.Instance.TryConsumeWarehouseItem(material.item, material.amount);
         }
 
-        // 2. 更新人口：先注销旧阶层，再注册新阶层
+        // 2. 更新人口
         PopulationManager.Instance.UpdatePopulation(currentTier, -_residentCount);
 
-        // 3. 升级！切换到下一个阶层
+        // 3. 升级！
         currentTier = currentTier.nextTier;
         _residentCount = currentTier.residentsPerHouse;
         PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
 
-        // 4. 重置幸福度到基础值
+        // 4. 重置幸福度
         currentHappiness = 10;
 
         Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}，人口变为 {_residentCount}！</color>");
 
-        // 5. (未来) 在这里可以加上更换房屋模型、播放特效和音效的代码
+        // 5. (未来) 更换模型...
     }
 }

@@ -88,6 +88,10 @@ public class Constructable : MonoBehaviour, IDamageable
         GetComponent<House>()?.ActivateHouse();
         // <<< --------------------- >>>
 
+        // 尝试获取 ProductionBuilding 组件，如果存在，就调用它的 ActivateBuilding 方法
+        GetComponent<ProductionBuilding>()?.ActivateBuilding();
+        // <<< --------------------- >>>
+
         if (isEnemy)
         {
             gameObject.tag = "Enemy";
