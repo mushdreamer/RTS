@@ -83,24 +83,34 @@ public class Constructable : MonoBehaviour, IDamageable
         healthTracker.gameObject.SetActive(true);
         ActivateObstacle();
 
-        // <<< 在这里添加以下代码 >>>
-        // 尝试获取这个对象上的 House 组件，如果存在，就调用它的 ActivateHouse 方法
         GetComponent<House>()?.ActivateHouse();
-        // <<< --------------------- >>>
-
-        // 尝试获取 ProductionBuilding 组件，如果存在，就调用它的 ActivateBuilding 方法
         GetComponent<ProductionBuilding>()?.ActivateBuilding();
-        // <<< --------------------- >>>
 
         if (isEnemy)
         {
             gameObject.tag = "Enemy";
         }
 
-        if (GetComponent<PowerUser>() != null)
+        // =====================================================================
+        // <<< 在这里添加以下新代码 >>>
+
+        // 查找这个游戏对象上是否存在能源生产者组件 (IEnergyProducer)
+        var producer = GetComponent<IEnergyProducer>();
+        // 如果找到了，就将该组件本身（作为MonoBehaviour）启用
+        if (producer != null && producer is MonoBehaviour producerComponent)
         {
-            GetComponent<PowerUser>().PowerOn();
+            producerComponent.enabled = true;
         }
+
+        // 同样，查找是否存在能源消费者组件 (IEnergyConsumer)
+        var consumer = GetComponent<IEnergyConsumer>();
+        // 如果找到了，就启用它
+        if (consumer != null && consumer is MonoBehaviour consumerComponent)
+        {
+            consumerComponent.enabled = true;
+        }
+
+        // =====================================================================
     }
 
     private void ActivateObstacle()

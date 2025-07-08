@@ -758,7 +758,7 @@ GameObject:
   - component: {fileID: 3468663458769910413}
   - component: {fileID: 8546222914232018850}
   - component: {fileID: -1144176008808255896}
-  - component: {fileID: 5300108463491098419}
+  - component: {fileID: 4457943713762776821}
   m_Layer: 10
   m_Name: CommandCenter
   m_TagString: Untagged
@@ -823,21 +823,19 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &5300108463491098419
+--- !u!114 &4457943713762776821
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 8527331939346141501}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 97451f4bc78678a4a8dbcece9bb43994, type: 3}
+  m_Script: {fileID: 11500000, guid: 03b768de8b2119c419dec83894fed0cc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  producingPower: 0
-  consumingPower: 50
-  isProducer: 0
+  powerRequirement: 15
 --- !u!1001 &4985443624332912208
 PrefabInstance:
   m_ObjectHideFlags: 0
