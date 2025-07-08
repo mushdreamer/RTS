@@ -172,11 +172,7 @@ public class ResourceManager : MonoBehaviour
             if (debugFishData != null)
             {
                 AddWarehouseItem(debugFishData, 10);
-                Debug.Log($"调试：手动增加了10单位的【{debugFishData.itemName}】!");
-            }
-            else
-            {
-                Debug.LogWarning("调试失败：请在ResourceManager的Inspector面板中设置'Debug Fish Data'!");
+                Debug.Log($"Debug：You add 10 units【{debugFishData.itemName}】!");
             }
         }
 
@@ -186,11 +182,7 @@ public class ResourceManager : MonoBehaviour
             if (debugWoodData != null)
             {
                 AddWarehouseItem(debugWoodData, 10);
-                Debug.Log($"调试：手动增加了10单位的【{debugWoodData.itemName}】!");
-            }
-            else
-            {
-                Debug.LogWarning("调试失败：请在ResourceManager的Inspector面板中设置'Debug Wood Data'!");
+                Debug.Log($"Debug：You add 10 units【{debugWoodData.itemName}】!");
             }
         }
     }

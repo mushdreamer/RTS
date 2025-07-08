@@ -64,7 +64,7 @@ public class House : MonoBehaviour
         // 条件1：检查是否存在下一级
         if (currentTier.nextTier == null)
         {
-            Debug.Log("检查升级失败：当前阶层 '" + currentTier.tierName + "' 没有下一级可供升级。");
+            Debug.Log("Upgrade Failed! Population tier is" + currentTier.tierName + "There is nothing to upgrade");
             return false;
         }
 
@@ -72,7 +72,7 @@ public class House : MonoBehaviour
         if (currentHappiness < currentTier.HappinessToUpgrade)
         {
             // 使用富文本让关键数字更显眼
-            Debug.Log($"检查升级失败：幸福度不足。需要: <b>{currentTier.HappinessToUpgrade}</b>, 当前: <b>{currentHappiness}</b>");
+            Debug.Log($"Upgrade Failed! You don't have enough happiness. You need:<b>{currentTier.HappinessToUpgrade}</b>, Now you have: <b>{currentHappiness}</b>");
             return false;
         }
 
@@ -82,20 +82,19 @@ public class House : MonoBehaviour
             // 确保 material.item 不为空，避免潜在的错误
             if (material.item == null)
             {
-                Debug.LogError("数据错误：升级材料中有一个物品(ItemData)是空的！");
                 continue;
             }
 
             float stock = ResourceManager.Instance.GetWarehouseStock(material.item);
             if (stock < material.amount)
             {
-                Debug.LogWarning($"检查升级失败：缺少材料 <b>{material.item.itemName}</b>。需要: {material.amount}, 当前库存: {stock:F0}");
+                Debug.LogWarning($"Upgrade Failed! You don't have enough materials <b>{material.item.itemName}</b>。You need: {material.amount}, Now you have: {stock:F0}");
                 return false;
             }
         }
 
         // 如果所有检查都通过了
-        Debug.Log("<color=green>所有升级条件均已满足！可以升级！</color>");
+        Debug.Log("<color=green>Ready to be upgraded</color>");
         return true;
     }
 
@@ -126,7 +125,7 @@ public class House : MonoBehaviour
         // 4. 重置幸福度
         currentHappiness = 10;
 
-        Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}，人口变为 {_residentCount}！</color>");
+        Debug.Log($"<color=cyan>You upgrade your house! Now your population tier is {currentTier.tierName}，The population is {_residentCount}！</color>");
 
         // 5. (未来) 更换模型...
     }

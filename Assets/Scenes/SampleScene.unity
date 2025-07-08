@@ -1046,7 +1046,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &563033271
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1062,8 +1062,8 @@ MonoBehaviour:
   allEvents:
   - {fileID: 11400000, guid: 682a5ac677449884cbca74488e9c5500, type: 2}
   - {fileID: 11400000, guid: a5d4c380e89ec1a48b46d7823aef3e76, type: 2}
-  minTimeBetweenEvents: 20
-  maxTimeBetweenEvents: 60
+  minTimeBetweenEvents: 10
+  maxTimeBetweenEvents: 20
   currentGameDay: 1
   playerPopulation: 3
 --- !u!4 &563033272
@@ -2324,7 +2324,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 27.15
+  m_fontSize: 26.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -2946,6 +2946,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   gameStatusText: {fileID: 1114840073}
   farmerTier: {fileID: 11400000, guid: ed990e90840912a4e8042973433c6b91, type: 2}
+  workerTier: {fileID: 11400000, guid: e293eb043ad073f4d987af98102f74c7, type: 2}
   fishData: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
   woodData: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
 --- !u!4 &1117056785
@@ -4870,7 +4871,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 48.1
+  m_fontSize: 46.65
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5818,18 +5819,23 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 3236044317008692058, guid: a7beb061a9f4ab2448548e8788a34c6f,
         type: 3}
+      propertyPath: m_IsActive
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3236044317008692058, guid: a7beb061a9f4ab2448548e8788a34c6f,
+        type: 3}
       propertyPath: m_TagString
       value: Unit
       objectReference: {fileID: 0}
     - target: {fileID: 4653915907743215882, guid: a7beb061a9f4ab2448548e8788a34c6f,
         type: 3}
       propertyPath: m_AnchorMax.x
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 4653915907743215882, guid: a7beb061a9f4ab2448548e8788a34c6f,
         type: 3}
       propertyPath: m_AnchorMax.y
-      value: 0
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 8722219527060932495, guid: a7beb061a9f4ab2448548e8788a34c6f,
         type: 3}
