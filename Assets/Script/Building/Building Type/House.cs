@@ -1,4 +1,4 @@
-// House.cs - 增加了升级逻辑
+// House.cs - 升级为高频消耗版本
 using UnityEngine;
 
 public class House : MonoBehaviour
@@ -9,12 +9,15 @@ public class House : MonoBehaviour
     [Range(0, 20)]
     public int currentHappiness = 10;
 
+    // <<< 修改点 1：让消耗间隔可以在Inspector里设置，并默认改为1秒 >>>
+    [Header("消耗设置")]
+    [Tooltip("每隔多少秒进行一次物资消耗和幸福度更新")]
+    public float consumptionInterval = 1f;
+
     private int _residentCount;
-    private float _consumptionIntervalInSeconds = 60f;
     private bool _isActivated = false;
 
     // --- 为了方便测试，我们添加一个简单的交互方式 ---
-    // 当鼠标点击这个房屋时，尝试进行升级
     private void OnMouseDown()
     {
         TryToUpgrade();
@@ -29,7 +32,9 @@ public class House : MonoBehaviour
         _residentCount = currentTier.residentsPerHouse;
         PopulationManager.Instance.RegisterHouse(this);
         PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
-        InvokeRepeating(nameof(ConsumeNeeds), _consumptionIntervalInSeconds, _consumptionIntervalInSeconds);
+
+        // 使用我们在Inspector里设置的 consumptionInterval
+        InvokeRepeating(nameof(ConsumeNeeds), consumptionInterval, consumptionInterval);
     }
 
     void OnDestroy()
@@ -44,10 +49,17 @@ public class House : MonoBehaviour
     private void ConsumeNeeds()
     {
         if (currentTier == null) return;
+
         foreach (var need in currentTier.needs)
         {
-            if (ResourceManager.Instance.TryConsumeWarehouseItem(need.item, need.consumptionPerMinute))
+            // <<< 修改点 2：计算本次（每秒）应该消耗的数量 >>>
+            // (每分钟消耗量 / 60秒) * 本次消耗的间隔时间
+            float amountToConsume = (need.consumptionPerMinute / 60f) * consumptionInterval;
+
+            if (ResourceManager.Instance.TryConsumeWarehouseItem(need.item, amountToConsume))
             {
+                // 为了让幸福度变化不那么剧烈，我们可以让它在满足时缓慢增加
+                // 比如每10秒才加一点幸福度，这里我们暂时保持原样，让效果更明显
                 currentHappiness++;
             }
             else
@@ -58,75 +70,36 @@ public class House : MonoBehaviour
         currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
     }
 
-    // <<< 新增：检查是否满足升级条件的方法 >>>
     public bool CanUpgrade()
     {
-        // 条件1：检查是否存在下一级
-        if (currentTier.nextTier == null)
-        {
-            Debug.Log("Upgrade Failed! Population tier is" + currentTier.tierName + "There is nothing to upgrade");
-            return false;
-        }
+        if (currentTier.nextTier == null) { return false; }
+        if (currentHappiness < currentTier.HappinessToUpgrade) { return false; }
 
-        // 条件2：检查幸福度是否达标
-        if (currentHappiness < currentTier.HappinessToUpgrade)
-        {
-            // 使用富文本让关键数字更显眼
-            Debug.Log($"Upgrade Failed! You don't have enough happiness. You need:<b>{currentTier.HappinessToUpgrade}</b>, Now you have: <b>{currentHappiness}</b>");
-            return false;
-        }
-
-        // 条件3：检查升级材料是否足够
         foreach (var material in currentTier.upgradeMaterials)
         {
-            // 确保 material.item 不为空，避免潜在的错误
-            if (material.item == null)
-            {
-                continue;
-            }
-
-            float stock = ResourceManager.Instance.GetWarehouseStock(material.item);
-            if (stock < material.amount)
-            {
-                Debug.LogWarning($"Upgrade Failed! You don't have enough materials <b>{material.item.itemName}</b>。You need: {material.amount}, Now you have: {stock:F0}");
-                return false;
-            }
+            if (ResourceManager.Instance.GetWarehouseStock(material.item) < material.amount) { return false; }
         }
-
-        // 如果所有检查都通过了
-        Debug.Log("<color=green>Ready to be upgraded</color>");
         return true;
     }
 
-    // <<< 新增：尝试执行升级的方法 >>>
     public void TryToUpgrade()
     {
-        // 现在这个方法只负责调用检查，如果CanUpgrade返回false，它什么也不做。
-        // 所有的失败日志都由CanUpgrade自己来打印。
         if (!CanUpgrade())
         {
+            // 可以在这里加一个音效或视觉提示
             return;
         }
 
-        // 1. 消耗升级材料
         foreach (var material in currentTier.upgradeMaterials)
         {
             ResourceManager.Instance.TryConsumeWarehouseItem(material.item, material.amount);
         }
 
-        // 2. 更新人口
         PopulationManager.Instance.UpdatePopulation(currentTier, -_residentCount);
-
-        // 3. 升级！
         currentTier = currentTier.nextTier;
         _residentCount = currentTier.residentsPerHouse;
         PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
-
-        // 4. 重置幸福度
         currentHappiness = 10;
-
-        Debug.Log($"<color=cyan>You upgrade your house! Now your population tier is {currentTier.tierName}，The population is {_residentCount}！</color>");
-
-        // 5. (未来) 更换模型...
+        Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}！</color>");
     }
 }
