@@ -84,7 +84,7 @@ public class PlacementSystem : MonoBehaviour
         Vector3 mousePosition = inputManager.GetSelectedMapPosition();
         Vector3Int gridPosition = grid.WorldToCell(mousePosition);
 
-        buildingState.OnAction(gridPosition);
+        buildingState.OnAction(gridPosition);   
 
 
         // ---- Using the ID remove used resources from resource manager ---- // 

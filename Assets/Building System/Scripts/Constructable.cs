@@ -23,6 +23,10 @@ public class Constructable : MonoBehaviour, IDamageable
 
     public bool inPreviewMode;
 
+    [Header("逻辑开关")]
+    [Tooltip("如果此对象应作为导航障碍物，则勾选此项")]
+    public bool actsAsObstacle = true; // 默认设为true，这样您现有的建筑就不会受影响
+
     // <<< 1. 在这里添加一个公共变量，用于链接破坏特效的Prefab >>>
     [Header("Effects")]
     public GameObject destructionEffectPrefab;
@@ -81,7 +85,14 @@ public class Constructable : MonoBehaviour, IDamageable
         inPreviewMode = false;
 
         healthTracker.gameObject.SetActive(true);
-        ActivateObstacle();
+
+        // <<< 我们在这里添加一个判断条件 >>>
+        // 只有当 actsAsObstacle 为 true 时，才去激活障碍物
+        if (actsAsObstacle)
+        {
+            ActivateObstacle();
+        }
+        // <<< 修改结束 >>>
 
         GetComponent<House>()?.ActivateHouse();
         GetComponent<ProductionBuilding>()?.ActivateBuilding();

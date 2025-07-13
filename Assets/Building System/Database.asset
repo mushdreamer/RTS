@@ -46,3 +46,14 @@ MonoBehaviour:
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 01000000
     <benefits>k__BackingField: []
+  - <Name>k__BackingField: Road
+    <ID>k__BackingField: 3
+    <thisBuildingType>k__BackingField: 0
+    description: 
+    <Size>k__BackingField: {x: 1, y: 1}
+    <Prefab>k__BackingField: {fileID: 434616650557811876, guid: a05cd1062a2775a4990e3b700de98273,
+      type: 3}
+    <creditCost>k__BackingField: 1
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 
+    <benefits>k__BackingField: []
