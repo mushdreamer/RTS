@@ -26,6 +26,9 @@ public class Constructable : MonoBehaviour, IDamageable
     [Header("逻辑开关")]
     [Tooltip("如果此对象应作为导航障碍物，则勾选此项")]
     public bool actsAsObstacle = true; // 默认设为true，这样您现有的建筑就不会受影响
+                                       // <<< 在这里添加新的开关 >>>
+    [Tooltip("如果此对象拥有生命值和血条，则勾选此项")]
+    public bool hasHealthSystem = true; // 默认设为true，以兼容现有建筑
 
     // <<< 1. 在这里添加一个公共变量，用于链接破坏特效的Prefab >>>
     [Header("Effects")]
@@ -33,26 +36,34 @@ public class Constructable : MonoBehaviour, IDamageable
 
     private void Start()
     {
-        constHealth = constMaxHealth;
-        UpdateHealthUI();
+        // <<< 修改这里 >>>
+        // 只有在启用生命值系统时，才初始化生命值并更新UI
+        if (hasHealthSystem)
+        {
+            constHealth = constMaxHealth;
+            UpdateHealthUI();
+        }
     }
 
     private void UpdateHealthUI()
     {
-        healthTracker.UpdateSliderValue(constHealth, constMaxHealth);
+        // <<< 修改这里 >>>
+        // 只有在启用生命值系统且healthTracker已分配时，才更新滑块
+        if (hasHealthSystem && healthTracker != null)
+        {
+            healthTracker.UpdateSliderValue(constHealth, constMaxHealth);
+        }
 
+        // 销毁逻辑保持不变，因为一个没有血条的物体也可能被摧毁
         if (constHealth <= 0)
         {
             ResourceManager.Instance.UpdateBuildingChanged(buildingType, false, buildPosition);
+            SoundManager.Instance.PlayBuildingDestructionSound();
 
-            SoundManager.Instance.PlayBuildingDestructionSound();//future when we have more sounds //SoundManager.Instance.PlayBuildingDestructionSound(buildingType);
-
-            // <<< 2. 在销毁对象前，实例化破坏特效 >>>
             if (destructionEffectPrefab != null)
             {
                 Instantiate(destructionEffectPrefab, transform.position, transform.rotation);
             }
-            // <<< ----------------------------------- >>>
 
             Destroy(gameObject);
         }
@@ -72,9 +83,11 @@ public class Constructable : MonoBehaviour, IDamageable
 
     public void TakeDamage(int damage)
     {
+        // <<< 在方法开头添加一个“守护语句” >>>
+        // 如果此对象没有生命值系统，则直接返回，不执行任何操作
+        if (!hasHealthSystem) return;
+
         constHealth -= damage;
-        // --- Add this English diagnostic line! ---
-        //Debug.Log($"[DIAGNOSTIC] {name} took {damage} damage. Health remaining: {constHealth} / {constMaxHealth}");
         UpdateHealthUI();
     }
 
@@ -84,7 +97,12 @@ public class Constructable : MonoBehaviour, IDamageable
 
         inPreviewMode = false;
 
-        healthTracker.gameObject.SetActive(true);
+        // <<< 修改这里 >>>
+        // 仅在启用生命值系统且healthTracker已分配时，才激活UI
+        if (hasHealthSystem && healthTracker != null)
+        {
+            healthTracker.gameObject.SetActive(true);
+        }
 
         // <<< 我们在这里添加一个判断条件 >>>
         // 只有当 actsAsObstacle 为 true 时，才去激活障碍物

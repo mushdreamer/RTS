@@ -54,6 +54,7 @@ MonoBehaviour:
   buildPosition: {x: 0, y: 0, z: 0}
   inPreviewMode: 1
   actsAsObstacle: 0
+  hasHealthSystem: 0
   destructionEffectPrefab: {fileID: 0}
 --- !u!65 &5702158035851813480
 BoxCollider:
