@@ -57,3 +57,14 @@ MonoBehaviour:
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
     <benefits>k__BackingField: []
+  - <Name>k__BackingField: Warehouse
+    <ID>k__BackingField: 4
+    <thisBuildingType>k__BackingField: 0
+    description: 
+    <Size>k__BackingField: {x: 3, y: 2}
+    <Prefab>k__BackingField: {fileID: 722688895162543591, guid: 50941decac090c642888a79eca6aeede,
+      type: 3}
+    <creditCost>k__BackingField: 8
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 
+    <benefits>k__BackingField: []
