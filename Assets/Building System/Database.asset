@@ -40,7 +40,7 @@ MonoBehaviour:
     <thisBuildingType>k__BackingField: 3
     description: 
     <Size>k__BackingField: {x: 2, y: 2}
-    <Prefab>k__BackingField: {fileID: 6894239926297190709, guid: ba6244778a8aad542abb534feb299990,
+    <Prefab>k__BackingField: {fileID: 8527331939346141501, guid: f419cdde55f62f4419e12757ed661eb5,
       type: 3}
     <creditCost>k__BackingField: 5
     <materialRequirements>k__BackingField: []
