@@ -697,7 +697,7 @@ MonoBehaviour:
   unAvailableSprite: {fileID: 21300000, guid: d3bb8ba03f854074b9f159fd2f658110, type: 3}
   isAvailable: 0
   buySystem: {fileID: 1078291641}
-  databaseItemID: 1
+  databaseItemID: 4
 --- !u!1 &330585543
 GameObject:
   m_ObjectHideFlags: 0
@@ -1371,7 +1371,7 @@ MonoBehaviour:
   unAvailableSprite: {fileID: 21300000, guid: d3bb8ba03f854074b9f159fd2f658110, type: 3}
   isAvailable: 0
   buySystem: {fileID: 1078291641}
-  databaseItemID: 2
+  databaseItemID: 1
 --- !u!114 &599668131
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2351,7 +2351,7 @@ MonoBehaviour:
   unAvailableSprite: {fileID: 21300000, guid: d3bb8ba03f854074b9f159fd2f658110, type: 3}
   isAvailable: 0
   buySystem: {fileID: 1078291641}
-  databaseItemID: 3
+  databaseItemID: 0
 --- !u!114 &947402213
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2538,7 +2538,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26
+  m_fontSize: 28.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -3131,7 +3131,7 @@ GameObject:
   - component: {fileID: 1126494033}
   - component: {fileID: 1126494036}
   m_Layer: 5
-  m_Name: CommandCenter
+  m_Name: Market
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -3266,7 +3266,7 @@ MonoBehaviour:
   unAvailableSprite: {fileID: 21300000, guid: 9c2c4095bfc80fa438019007a7f6866d, type: 3}
   isAvailable: 0
   buySystem: {fileID: 1078291641}
-  databaseItemID: 0
+  databaseItemID: 2
 --- !u!1 &1169089063
 GameObject:
   m_ObjectHideFlags: 0
@@ -3982,7 +3982,7 @@ MonoBehaviour:
   unAvailableSprite: {fileID: 21300000, guid: d3bb8ba03f854074b9f159fd2f658110, type: 3}
   isAvailable: 0
   buySystem: {fileID: 1078291641}
-  databaseItemID: 4
+  databaseItemID: 3
 --- !u!114 &1399602994
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -4156,11 +4156,11 @@ RectTransform:
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
-  - {fileID: 1126494032}
-  - {fileID: 273994385}
-  - {fileID: 599668129}
   - {fileID: 947402211}
+  - {fileID: 599668129}
+  - {fileID: 1126494032}
   - {fileID: 1399602992}
+  - {fileID: 273994385}
   m_Father: {fileID: 1078291638}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -5135,7 +5135,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.1
+  m_fontSize: 49.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -5599,7 +5599,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.25}
   m_AnchorMax: {x: 1, y: 0.75}
-  m_AnchoredPosition: {x: -5, y: 0}
+  m_AnchoredPosition: {x: -5.000061, y: 0}
   m_SizeDelta: {x: -20, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!1 &2046751495

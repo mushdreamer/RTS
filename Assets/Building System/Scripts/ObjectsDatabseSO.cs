@@ -26,11 +26,11 @@ public class ObjectsDatabseSO : ScriptableObject
 public enum BuildingType
 {
     None,
-    CommandCenter,
-    PowerPlant,
+    Road,
     House,
+    Market,
     Warehouse,
-    Road
+    PowerPlant
 }
 
 [System.Serializable]
