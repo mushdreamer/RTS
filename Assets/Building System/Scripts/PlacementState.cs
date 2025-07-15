@@ -68,6 +68,9 @@ public class PlacementState : IBuildingState
 
         GridData selectedData = floorData;
 
+        // <<< 在这里添加新的调试日志 >>>
+        Debug.Log($"--- 正在向GridData添加对象: {database.objectsData[selectedObjectIndex].Name} (ID: {database.objectsData[selectedObjectIndex].ID}) ---");
+
         selectedData.AddObjectAt(gridPosition,
             database.objectsData[selectedObjectIndex].Size,
             database.objectsData[selectedObjectIndex].ID,
@@ -115,4 +118,5 @@ public class PlacementState : IBuildingState
 
         previewSystem.UpdatePosition(grid.CellToWorld(gridPosition), placementValidity);
     }
+
 }

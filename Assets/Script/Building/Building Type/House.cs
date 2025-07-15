@@ -17,6 +17,11 @@ public class House : MonoBehaviour
     private int _residentCount;
     private bool _isActivated = false;
 
+    // <<< 新增的变量 >>>
+    private PlacementSystem placementSystem;
+    private Constructable constructable;
+    private bool isConnectedToRoad = false; // 用于缓存连接状态
+
     // --- 为了方便测试，我们添加一个简单的交互方式 ---
     private void OnMouseDown()
     {
@@ -29,6 +34,11 @@ public class House : MonoBehaviour
         if (currentTier == null) { /* ... 错误处理 ... */ return; }
 
         _isActivated = true;
+
+        // <<< 在这里添加初始化代码 >>>
+        placementSystem = FindObjectOfType<PlacementSystem>(); // 找到场景中的PlacementSystem
+        constructable = GetComponent<Constructable>(); // 获取挂在同一对象上的Constructable组件
+
         _residentCount = currentTier.residentsPerHouse;
         PopulationManager.Instance.RegisterHouse(this);
         PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
@@ -48,22 +58,33 @@ public class House : MonoBehaviour
 
     private void ConsumeNeeds()
     {
-        if (currentTier == null) return;
+        if (currentTier == null || placementSystem == null || constructable == null) return;
 
+        // 1. 调用 PlacementSystem 的功能来检查连接状态
+        isConnectedToRoad = placementSystem.IsBuildingConnectedToRoad(constructable.buildPosition);
+
+        // 2. 如果没有连接到道路，则直接惩罚幸福度，并且不消耗任何物资
+        if (!isConnectedToRoad)
+        {
+            currentHappiness -= 2; // 或者一个更大的惩罚值
+            currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
+            // Debug.Log(gameObject.name + " 未连接到道路，无法获取物资！");
+            return; // 直接结束，不执行后续的消耗逻辑
+        }
+
+        // 3. 如果已连接，才执行正常的物资消耗逻辑
         foreach (var need in currentTier.needs)
         {
-            // <<< 修改点 2：计算本次（每秒）应该消耗的数量 >>>
-            // (每分钟消耗量 / 60秒) * 本次消耗的间隔时间
             float amountToConsume = (need.consumptionPerMinute / 60f) * consumptionInterval;
 
             if (ResourceManager.Instance.TryConsumeWarehouseItem(need.item, amountToConsume))
             {
-                // 为了让幸福度变化不那么剧烈，我们可以让它在满足时缓慢增加
-                // 比如每10秒才加一点幸福度，这里我们暂时保持原样，让效果更明显
+                // 物资充足，增加幸福度
                 currentHappiness++;
             }
             else
             {
+                // 物资不足，减少幸福度
                 currentHappiness -= 2;
             }
         }

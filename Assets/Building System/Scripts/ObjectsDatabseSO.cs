@@ -27,7 +27,10 @@ public enum BuildingType
 {
     None,
     CommandCenter,
-    PowerPlant
+    PowerPlant,
+    House,
+    Warehouse,
+    Road
 }
 
 [System.Serializable]

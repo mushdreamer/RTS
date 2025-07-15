@@ -328,7 +328,7 @@ MonoBehaviour:
   constMaxHealth: 80
   healthTracker: {fileID: 7780168515602202911}
   isEnemy: 0
-  buildingType: 0
+  buildingType: 4
   buildPosition: {x: 0, y: 0, z: 0}
   inPreviewMode: 1
   actsAsObstacle: 1
