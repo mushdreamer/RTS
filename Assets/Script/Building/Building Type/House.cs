@@ -1,50 +1,44 @@
-// House.cs - 升级为高频消耗版本
+// House.cs - 修正版本
 using UnityEngine;
+using System.Collections.Generic;
+using System.Linq;
 
 public class House : MonoBehaviour
 {
     public PopulationTier currentTier;
 
-    [Header("状态")]
-    [Range(0, 20)]
-    public int currentHappiness = 10;
+    [Header("实时状态")]
+    public List<HouseNeedState> trackedNeeds;
+    public int currentResidents;
+    public int maxResidents;
+    public int currentHappiness;
 
-    // <<< 修改点 1：让消耗间隔可以在Inspector里设置，并默认改为1秒 >>>
-    [Header("消耗设置")]
-    [Tooltip("每隔多少秒进行一次物资消耗和幸福度更新")]
-    public float consumptionInterval = 1f;
+    [Header("成长参数")]
+    [Tooltip("基础居民数量")]
+    public int baseResidents = 5;
+    [Tooltip("每满足一个需求增加的居民")]
+    public int residentsPerNeedMet = 5;
 
-    private int _residentCount;
     private bool _isActivated = false;
-
-    // <<< 新增的变量 >>>
-    private PlacementSystem placementSystem;
-    private Constructable constructable;
-    private bool isConnectedToRoad = false; // 用于缓存连接状态
 
     // --- 为了方便测试，我们添加一个简单的交互方式 ---
     private void OnMouseDown()
     {
-        TryToUpgrade();
+        // 检查是否可以升级，如果可以就升级
+        if (CanUpgrade())
+        {
+            TryToUpgrade();
+        }
     }
 
     public void ActivateHouse()
     {
         if (_isActivated) return;
-        if (currentTier == null) { /* ... 错误处理 ... */ return; }
 
-        _isActivated = true;
-
-        // <<< 在这里添加初始化代码 >>>
-        placementSystem = FindObjectOfType<PlacementSystem>(); // 找到场景中的PlacementSystem
-        constructable = GetComponent<Constructable>(); // 获取挂在同一对象上的Constructable组件
-
-        _residentCount = currentTier.residentsPerHouse;
         PopulationManager.Instance.RegisterHouse(this);
-        PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
-
-        // 使用我们在Inspector里设置的 consumptionInterval
-        InvokeRepeating(nameof(ConsumeNeeds), consumptionInterval, consumptionInterval);
+        InitializeNeeds();
+        RecalculateState();
+        _isActivated = true;
     }
 
     void OnDestroy()
@@ -52,75 +46,78 @@ public class House : MonoBehaviour
         if (_isActivated && PopulationManager.Instance != null)
         {
             PopulationManager.Instance.UnregisterHouse(this);
-            PopulationManager.Instance.UpdatePopulation(currentTier, -_residentCount);
         }
     }
 
-    private void ConsumeNeeds()
+    private void InitializeNeeds()
     {
-        if (currentTier == null || placementSystem == null || constructable == null) return;
-
-        // 1. 调用 PlacementSystem 的功能来检查连接状态
-        isConnectedToRoad = placementSystem.IsBuildingConnectedToRoad(constructable.buildPosition);
-
-        // 2. 如果没有连接到道路，则直接惩罚幸福度，并且不消耗任何物资
-        if (!isConnectedToRoad)
+        trackedNeeds = new List<HouseNeedState>();
+        if (currentTier != null && currentTier.needs != null)
         {
-            currentHappiness -= 2; // 或者一个更大的惩罚值
-            currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
-            // Debug.Log(gameObject.name + " 未连接到道路，无法获取物资！");
-            return; // 直接结束，不执行后续的消耗逻辑
-        }
-
-        // 3. 如果已连接，才执行正常的物资消耗逻辑
-        foreach (var need in currentTier.needs)
-        {
-            float amountToConsume = (need.consumptionPerMinute / 60f) * consumptionInterval;
-
-            if (ResourceManager.Instance.TryConsumeWarehouseItem(need.item, amountToConsume))
+            foreach (var need in currentTier.needs)
             {
-                // 物资充足，增加幸福度
-                currentHappiness++;
-            }
-            else
-            {
-                // 物资不足，减少幸福度
-                currentHappiness -= 2;
+                trackedNeeds.Add(new HouseNeedState(need));
             }
         }
+    }
+
+    public void RecalculateState()
+    {
+        if (currentTier == null) return;
+
+        int needsMetCount = trackedNeeds.Count(n => n.isMet);
+
+        maxResidents = baseResidents + (currentTier.needs.Count * residentsPerNeedMet);
+        currentResidents = baseResidents + (needsMetCount * residentsPerNeedMet);
+        currentResidents = Mathf.Min(currentResidents, maxResidents);
+
+        currentHappiness = 10 + (needsMetCount * 2) - ((currentTier.needs.Count - needsMetCount) * 1);
         currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
+
+        // 更新总人口，这里我们直接在PopulationManager中处理，确保数据同步
+        PopulationManager.Instance.UpdatePopulationForHouse(this, currentResidents);
     }
 
     public bool CanUpgrade()
     {
-        if (currentTier.nextTier == null) { return false; }
-        if (currentHappiness < currentTier.HappinessToUpgrade) { return false; }
+        if (currentTier.nextTier == null) return false;
+        if (currentResidents < maxResidents) return false;
 
         foreach (var material in currentTier.upgradeMaterials)
         {
-            if (ResourceManager.Instance.GetWarehouseStock(material.item) < material.amount) { return false; }
+            if (ResourceManager.Instance.GetWarehouseStock(material.item) < material.amount) return false;
         }
         return true;
     }
 
+    /// <summary>
+    /// 【新增】这就是UI脚本找不到的升级方法
+    /// </summary>
     public void TryToUpgrade()
     {
         if (!CanUpgrade())
         {
-            // 可以在这里加一个音效或视觉提示
+            Debug.Log("升级条件未满足！");
             return;
         }
 
+        // 消耗升级材料
         foreach (var material in currentTier.upgradeMaterials)
         {
             ResourceManager.Instance.TryConsumeWarehouseItem(material.item, material.amount);
         }
 
-        PopulationManager.Instance.UpdatePopulation(currentTier, -_residentCount);
+        // 从旧阶层注销并更新人口
+        PopulationManager.Instance.UnregisterHouse(this);
+
+        // 升级到新阶层
         currentTier = currentTier.nextTier;
-        _residentCount = currentTier.residentsPerHouse;
-        PopulationManager.Instance.UpdatePopulation(currentTier, _residentCount);
-        currentHappiness = 10;
+
+        // 在新阶层重新注册并初始化
+        PopulationManager.Instance.RegisterHouse(this);
+        InitializeNeeds(); // 使用新阶层的需求重新初始化
+        RecalculateState(); // 重新计算状态
+
         Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}！</color>");
     }
 }

@@ -1,4 +1,4 @@
-// PopulationManager.cs - 增加了房屋列表和幸福度计算
+// PopulationManager.cs - 最终修正版
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -7,71 +7,118 @@ public class PopulationManager : MonoBehaviour
 {
     public static PopulationManager Instance { get; private set; }
 
-    private Dictionary<PopulationTier, int> _populationByTier = new Dictionary<PopulationTier, int>();
-
-    // <<< 新增：一个字典，用来按阶层存储所有房屋的列表 >>>
+    private Dictionary<PopulationTier, int> _totalPopulationByTier = new Dictionary<PopulationTier, int>();
     private Dictionary<PopulationTier, List<House>> _housesByTier = new Dictionary<PopulationTier, List<House>>();
+    private Dictionary<House, int> _populationPerHouse = new Dictionary<House, int>();
+
+    [Header("更新设置")]
+    [Tooltip("每隔多少秒进行一次总需求计算")]
+    public float needsUpdateInterval = 2.0f;
 
     void Awake()
     {
-        Debug.Log("<b><color=green>PopulationManager.Awake() has been called!</color></b> 这个日志应该在游戏开始时立刻出现。");
         if (Instance != null && Instance != this) { Destroy(gameObject); }
         else { Instance = this; }
     }
 
-    // <<< 新增：注册房屋的方法 >>>
+    void Start()
+    {
+        InvokeRepeating(nameof(UpdateAllTierNeeds), needsUpdateInterval, needsUpdateInterval);
+    }
+
+    private void UpdateAllTierNeeds()
+    {
+        if (_housesByTier.Keys.Count == 0) return;
+
+        foreach (PopulationTier tier in _housesByTier.Keys.ToList())
+        {
+            if (_housesByTier[tier].Count == 0) continue;
+
+            foreach (Need need in tier.needs)
+            {
+                float consumptionRate = (need.consumptionPerMinute / 60f) * needsUpdateInterval;
+                float totalDemand = consumptionRate * _housesByTier[tier].Count;
+                bool canMeetDemand = ResourceManager.Instance.GetWarehouseStock(need.item) >= totalDemand;
+
+                foreach (House house in _housesByTier[tier])
+                {
+                    HouseNeedState state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
+                    if (state != null)
+                    {
+                        state.isMet = canMeetDemand;
+                    }
+                }
+
+                if (canMeetDemand)
+                {
+                    ResourceManager.Instance.TryConsumeWarehouseItem(need.item, totalDemand);
+                }
+            }
+        }
+
+        foreach (List<House> houseList in _housesByTier.Values)
+        {
+            foreach (House house in houseList.ToList())
+            {
+                house.RecalculateState();
+            }
+        }
+    }
+
     public void RegisterHouse(House house)
     {
         PopulationTier tier = house.currentTier;
         if (!_housesByTier.ContainsKey(tier))
         {
             _housesByTier[tier] = new List<House>();
+            _totalPopulationByTier[tier] = 0;
         }
         _housesByTier[tier].Add(house);
+        _populationPerHouse[house] = 0;
     }
 
-    // <<< 新增：注销房屋的方法 >>>
     public void UnregisterHouse(House house)
     {
         PopulationTier tier = house.currentTier;
         if (_housesByTier.ContainsKey(tier))
         {
             _housesByTier[tier].Remove(house);
+            if (_populationPerHouse.ContainsKey(house))
+            {
+                _totalPopulationByTier[tier] -= _populationPerHouse[house];
+                _populationPerHouse.Remove(house);
+            }
         }
     }
 
-    // <<< 新增：计算平均幸福度的方法 >>>
-    public float GetAverageHappiness(PopulationTier tier)
+    public void UpdatePopulationForHouse(House house, int newAmount)
     {
-        if (tier == null || !_housesByTier.ContainsKey(tier) || _housesByTier[tier].Count == 0)
-        {
-            return 0; // 如果没有该阶层的房屋，则返回0
-        }
+        int oldAmount = _populationPerHouse.ContainsKey(house) ? _populationPerHouse[house] : 0;
+        _populationPerHouse[house] = newAmount;
 
-        // 使用LINQ来轻松计算平均值
-        return (float)_housesByTier[tier].Average(house => house.currentHappiness);
-    }
-
-    // --- 以下是原有方法，保持不变 ---
-    public void UpdatePopulation(PopulationTier tier, int changeAmount)
-    {
-        if (!_populationByTier.ContainsKey(tier))
+        int difference = newAmount - oldAmount;
+        if (house.currentTier != null && _totalPopulationByTier.ContainsKey(house.currentTier))
         {
-            _populationByTier[tier] = 0;
-        }
-        _populationByTier[tier] += changeAmount;
-        if (_populationByTier[tier] < 0)
-        {
-            _populationByTier[tier] = 0;
+            _totalPopulationByTier[house.currentTier] += difference;
         }
     }
 
     public int GetPopulation(PopulationTier tier)
     {
-        if (_populationByTier.ContainsKey(tier))
+        if (tier != null && _totalPopulationByTier.ContainsKey(tier))
         {
-            return _populationByTier[tier];
+            return _totalPopulationByTier[tier];
         }
         return 0;
+    }
+
+    public float GetAverageHappiness(PopulationTier tier)
+    {
+        if (tier == null || !_housesByTier.ContainsKey(tier) || _housesByTier[tier].Count == 0)
+        {
+            return 0;
+        }
+        // ▼▼▼ 唯一的修改点在这里 ▼▼▼
+        return (float)_housesByTier[tier].Average(h => h.currentHappiness);
     }
 }
