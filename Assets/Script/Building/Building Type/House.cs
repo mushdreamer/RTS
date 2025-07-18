@@ -1,4 +1,4 @@
-// House.cs - 修正版本
+// House.cs - 完整修正版
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,28 +12,32 @@ public class House : MonoBehaviour
     public int currentResidents;
     public int maxResidents;
     public int currentHappiness;
+    // ▼▼▼【错误来源1】您的代码里缺少这个变量 ▼▼▼
+    public bool isConnectedToWarehouse = false;
 
     [Header("成长参数")]
-    [Tooltip("基础居民数量")]
     public int baseResidents = 5;
-    [Tooltip("每满足一个需求增加的居民")]
     public int residentsPerNeedMet = 5;
 
     private bool _isActivated = false;
+    // ▼▼▼【错误来源2】您的代码里缺少这个变量 ▼▼▼
+    private Constructable constructable;
 
-    // --- 为了方便测试，我们添加一个简单的交互方式 ---
-    private void OnMouseDown()
-    {
-        // 检查是否可以升级，如果可以就升级
-        if (CanUpgrade())
-        {
-            TryToUpgrade();
-        }
-    }
+    private Vector3Int _myGridPosition; // 【新增】用来存储自己准确的网格坐标
 
-    public void ActivateHouse()
+    public void ActivateHouse(Vector3Int gridPosition)
     {
         if (_isActivated) return;
+
+        _myGridPosition = gridPosition; // 【新增】保存这个坐标
+
+        // ▼▼▼【错误来源3】缺少对constructable的赋值 ▼▼▼
+        constructable = GetComponent<Constructable>();
+        if (constructable == null)
+        {
+            Debug.LogError("House脚本无法找到Constructable组件！");
+            return;
+        }
 
         PopulationManager.Instance.RegisterHouse(this);
         InitializeNeeds();
@@ -65,6 +69,14 @@ public class House : MonoBehaviour
     {
         if (currentTier == null) return;
 
+        if (!isConnectedToWarehouse)
+        {
+            foreach (var need in trackedNeeds)
+            {
+                need.isMet = false;
+            }
+        }
+
         int needsMetCount = trackedNeeds.Count(n => n.isMet);
 
         maxResidents = baseResidents + (currentTier.needs.Count * residentsPerNeedMet);
@@ -74,8 +86,13 @@ public class House : MonoBehaviour
         currentHappiness = 10 + (needsMetCount * 2) - ((currentTier.needs.Count - needsMetCount) * 1);
         currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
 
-        // 更新总人口，这里我们直接在PopulationManager中处理，确保数据同步
         PopulationManager.Instance.UpdatePopulationForHouse(this, currentResidents);
+    }
+
+    // ▼▼▼【错误来源4】您的代码里缺少这个方法 ▼▼▼
+    public Vector3Int GetGridPosition()
+    {
+        return _myGridPosition;
     }
 
     public bool CanUpgrade()
@@ -90,9 +107,6 @@ public class House : MonoBehaviour
         return true;
     }
 
-    /// <summary>
-    /// 【新增】这就是UI脚本找不到的升级方法
-    /// </summary>
     public void TryToUpgrade()
     {
         if (!CanUpgrade())
@@ -101,22 +115,16 @@ public class House : MonoBehaviour
             return;
         }
 
-        // 消耗升级材料
         foreach (var material in currentTier.upgradeMaterials)
         {
             ResourceManager.Instance.TryConsumeWarehouseItem(material.item, material.amount);
         }
 
-        // 从旧阶层注销并更新人口
         PopulationManager.Instance.UnregisterHouse(this);
-
-        // 升级到新阶层
         currentTier = currentTier.nextTier;
-
-        // 在新阶层重新注册并初始化
         PopulationManager.Instance.RegisterHouse(this);
-        InitializeNeeds(); // 使用新阶层的需求重新初始化
-        RecalculateState(); // 重新计算状态
+        InitializeNeeds();
+        RecalculateState();
 
         Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}！</color>");
     }

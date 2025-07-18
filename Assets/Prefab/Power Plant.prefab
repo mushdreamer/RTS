@@ -651,9 +651,11 @@ MonoBehaviour:
   constMaxHealth: 100
   healthTracker: {fileID: 2805060586185967447}
   isEnemy: 0
-  buildingType: 2
+  buildingType: 5
   buildPosition: {x: 0, y: 0, z: 0}
   inPreviewMode: 1
+  actsAsObstacle: 1
+  hasHealthSystem: 1
   destructionEffectPrefab: {fileID: 0}
 --- !u!65 &7926864363439269603
 BoxCollider:

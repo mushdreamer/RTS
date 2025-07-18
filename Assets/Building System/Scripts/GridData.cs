@@ -1,30 +1,33 @@
+// GridData.cs - 完整修正版
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
 public class GridData
 {
-    Dictionary<Vector3Int, PlacementData> placedObjects = new();
+    // ▼▼▼ 问题的根源很可能在这里 ▼▼▼
+    // 确保这个字典的定义在所有方法的外部，作为类的成员变量，并且名字是 placedObjects
+    private Dictionary<Vector3Int, PlacementData> placedObjects = new Dictionary<Vector3Int, PlacementData>();
 
-    // 我们需要一个对数据库的引用来查询ID
     private ObjectsDatabseSO database;
 
-    // 添加一个方法来设置这个引用
     public void InitializeWithDatabase(ObjectsDatabseSO database)
     {
         this.database = database;
     }
 
-    public void AddObjectAt(Vector3Int gridPosition, Vector2Int objectSize, int Id, int placedObjectIndex)
+    public void AddObjectAt(Vector3Int gridPosition, Vector2Int objectSize, int id, int placedObjectIndex)
     {
-        List<Vector3Int> positionToOccuply = CalculatePositions(gridPosition, objectSize);
-        PlacementData data = new PlacementData(positionToOccuply, Id, placedObjectIndex);
-        foreach (var pos in positionToOccuply)
+        List<Vector3Int> positionToOccupy = CalculatePositions(gridPosition, objectSize);
+        PlacementData data = new PlacementData(positionToOccupy, id, placedObjectIndex);
+        foreach (var pos in positionToOccupy)
         {
             if (placedObjects.ContainsKey(pos))
             {
-                throw new Exception("Dictionary already contains this cell position");
+                // 这里可以先移除旧的对象，或者直接报错，根据你的游戏逻辑决定
+                // 为了健壮性，我们先不抛出异常，而是打印一个警告
+                Debug.LogWarning($"网格位置 {pos} 已被占据，旧对象将被覆盖。");
+                placedObjects.Remove(pos);
             }
             placedObjects[pos] = data;
         }
@@ -32,15 +35,15 @@ public class GridData
 
     private List<Vector3Int> CalculatePositions(Vector3Int gridPosition, Vector2Int objectSize)
     {
-        List<Vector3Int> returnVal1 = new();
+        List<Vector3Int> returnVal = new List<Vector3Int>();
         for (int x = 0; x < objectSize.x; x++)
         {
             for (int y = 0; y < objectSize.y; y++)
             {
-                returnVal1.Add(gridPosition + new Vector3Int(x,0,y));
+                returnVal.Add(gridPosition + new Vector3Int(x, 0, y));
             }
         }
-        return returnVal1;
+        return returnVal;
     }
 
     public bool CanPlaceObjectAt(Vector3Int gridPosition, Vector2Int objectSize)
@@ -56,12 +59,6 @@ public class GridData
         return true;
     }
 
-    // <<< 在这里添加新的核心函数 >>>
-    /// <summary>
-    /// 获取指定网格位置上对象的建筑类型 (BuildingType)。
-    /// </summary>
-    /// <param name="gridPosition">要查询的网格坐标</param>
-    /// <returns>返回对象的BuildingType，如果该位置为空则返回BuildingType.None</returns>
     public BuildingType GetObjectTypeAt(Vector3Int gridPosition)
     {
         if (!placedObjects.ContainsKey(gridPosition))
@@ -69,36 +66,33 @@ public class GridData
             return BuildingType.None;
         }
 
-        // 从网格数据中获取对象的ID
         int objectID = placedObjects[gridPosition].ID;
-
-        // 使用数据库根据ID查找对象的完整数据
         ObjectData objectData = database.GetObjectByID(objectID);
 
-        if (objectData != null)
-        {
-            return objectData.thisBuildingType;
-        }
-
-        return BuildingType.None;
+        return objectData?.thisBuildingType ?? BuildingType.None;
     }
 
-    internal void RemoveObjectAt(Vector3Int gridPosition)
+    public void RemoveObjectAt(Vector3Int gridPosition)
     {
-        foreach (var pos in placedObjects[gridPosition].occupiedPositions)
+        if (placedObjects.ContainsKey(gridPosition))
         {
-            placedObjects.Remove(pos);
+            // 需要先获取到要删除的对象所占据的所有格子
+            List<Vector3Int> positionsToRemove = new List<Vector3Int>(placedObjects[gridPosition].occupiedPositions);
+            foreach (var pos in positionsToRemove)
+            {
+                placedObjects.Remove(pos);
+            }
         }
     }
 
-    internal int GetRepresentationIndex(Vector3Int gridPosition)
+    public int GetRepresentationIndex(Vector3Int gridPosition)
     {
-        if (placedObjects.ContainsKey(gridPosition) == false)
+        if (!placedObjects.ContainsKey(gridPosition))
             return -1;
         return placedObjects[gridPosition].PlacedObjectIndex;
     }
 
-    internal PlacementData GetPlacementDataAt(Vector3Int gridPosition)
+    public PlacementData GetPlacementDataAt(Vector3Int gridPosition)
     {
         if (placedObjects.ContainsKey(gridPosition))
         {
@@ -107,7 +101,6 @@ public class GridData
         return null;
     }
 
-    // <<< 在文件末尾添加这个新的调试函数 >>>
     public void Debug_PrintAllOccupiedCells()
     {
         if (placedObjects.Count == 0)
@@ -117,12 +110,14 @@ public class GridData
         }
 
         Debug.Log($"<color=orange>GridData DEBUG: 'placedObjects' 字典包含 {placedObjects.Count} 个条目。</color>");
-        foreach (var entry in placedObjects)
+
+        // 为了避免重复打印同一个对象多次，我们先收集所有独立的对象
+        HashSet<PlacementData> uniqueObjects = new HashSet<PlacementData>(placedObjects.Values);
+
+        foreach (var placementData in uniqueObjects)
         {
-            // entry.Key 是网格坐标 (Vector3Int)
-            // entry.Value 是放置数据 (PlacementData)
-            ObjectData objectData = database.GetObjectByID(entry.Value.ID);
-            Debug.Log($"<color=orange>  - 坐标 {entry.Key} 被对象 '{objectData.Name}' (ID: {objectData.ID}) 占据。</color>");
+            ObjectData objectData = database.GetObjectByID(placementData.ID);
+            Debug.Log($"<color=orange>  - 对象 '{objectData.Name}' (ID: {objectData.ID}) 占据了 {placementData.occupiedPositions.Count} 个格子。</color>");
         }
     }
 }
@@ -134,10 +129,10 @@ public class PlacementData
     public int ID { get; private set; }
     public int PlacedObjectIndex { get; private set; }
 
-    public PlacementData(List<Vector3Int> occupiedPositions, int iD, int placedObjectIndex)
+    public PlacementData(List<Vector3Int> occupiedPositions, int id, int placedObjectIndex)
     {
         this.occupiedPositions = occupiedPositions;
-        ID = iD;
+        ID = id;
         PlacedObjectIndex = placedObjectIndex;
     }
 }

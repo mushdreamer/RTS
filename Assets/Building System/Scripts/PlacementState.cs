@@ -55,7 +55,9 @@ public class PlacementState : IBuildingState
             return;
         }
 
-        int index = objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab, grid.CellToWorld(gridPosition));
+        int index = objectPlacer.PlaceObject(database.objectsData[selectedObjectIndex].Prefab,
+                                      grid.CellToWorld(gridPosition),
+                                      gridPosition); // <-- 新增了 gridPosition 参数
 
         ResourceManager.Instance.DecreaseResourcesBasedOnRequirement(database.objectsData[selectedObjectIndex]);
 
@@ -67,9 +69,6 @@ public class PlacementState : IBuildingState
         //GridData selectedData = GetAllFloorIDs().Contains(database.objectsData[selectedObjectIndex].ID) ? floorData : furnitureData;
 
         GridData selectedData = floorData;
-
-        // <<< 在这里添加新的调试日志 >>>
-        Debug.Log($"--- 正在向GridData添加对象: {database.objectsData[selectedObjectIndex].Name} (ID: {database.objectsData[selectedObjectIndex].ID}) ---");
 
         selectedData.AddObjectAt(gridPosition,
             database.objectsData[selectedObjectIndex].Size,

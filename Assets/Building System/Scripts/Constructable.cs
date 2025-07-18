@@ -91,7 +91,7 @@ public class Constructable : MonoBehaviour, IDamageable
         UpdateHealthUI();
     }
 
-    public void ConstructableWasPlaced(Vector3 position)
+    public void ConstructableWasPlaced(Vector3 position, Vector3Int gridPosition)
     {
         buildPosition = position;
 
@@ -112,8 +112,8 @@ public class Constructable : MonoBehaviour, IDamageable
         }
         // <<< 修改结束 >>>
 
-        GetComponent<House>()?.ActivateHouse();
         GetComponent<ProductionBuilding>()?.ActivateBuilding();
+        GetComponent<House>()?.ActivateHouse(gridPosition); // <-- 新增了 gridPosition 参数
 
         if (isEnemy)
         {

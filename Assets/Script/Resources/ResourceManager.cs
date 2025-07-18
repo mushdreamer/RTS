@@ -172,7 +172,6 @@ public class ResourceManager : MonoBehaviour
             if (debugFishData != null)
             {
                 AddWarehouseItem(debugFishData, 10);
-                Debug.Log($"Debug£ºYou add 10 units¡¾{debugFishData.itemName}¡¿!");
             }
         }
 
@@ -182,7 +181,6 @@ public class ResourceManager : MonoBehaviour
             if (debugWoodData != null)
             {
                 AddWarehouseItem(debugWoodData, 10);
-                Debug.Log($"Debug£ºYou add 10 units¡¾{debugWoodData.itemName}¡¿!");
             }
         }
     }

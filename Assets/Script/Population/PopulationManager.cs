@@ -30,22 +30,41 @@ public class PopulationManager : MonoBehaviour
     {
         if (_housesByTier.Keys.Count == 0) return;
 
+        // 【修改点1】不再获取PlacementSystem，而是获取我们新的BuildingConnector
+        BuildingConnector connector = BuildingConnector.Instance;
+        if (connector == null) return; // 如果找不到，则不执行
+
         foreach (PopulationTier tier in _housesByTier.Keys.ToList())
         {
             if (_housesByTier[tier].Count == 0) continue;
 
+            // 在处理需求之前，先更新所有房屋的连接状态
+            foreach (House house in _housesByTier[tier])
+            {
+                // 【修改点2】调用新的、通用的连接检查方法
+                house.isConnectedToWarehouse = connector.CheckConnection(house.GetGridPosition(), BuildingType.Warehouse);
+            }
+
+            // 后续的逻辑完全保持不变
+            List<House> connectedHouses = _housesByTier[tier].Where(h => h.isConnectedToWarehouse).ToList();
+            int connectedHouseCount = connectedHouses.Count;
+
+            if (connectedHouseCount == 0) continue;
+
             foreach (Need need in tier.needs)
             {
                 float consumptionRate = (need.consumptionPerMinute / 60f) * needsUpdateInterval;
-                float totalDemand = consumptionRate * _housesByTier[tier].Count;
+                float totalDemand = consumptionRate * connectedHouseCount;
                 bool canMeetDemand = ResourceManager.Instance.GetWarehouseStock(need.item) >= totalDemand;
 
                 foreach (House house in _housesByTier[tier])
                 {
+                    bool isMet = house.isConnectedToWarehouse && canMeetDemand;
+
                     HouseNeedState state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
                     if (state != null)
                     {
-                        state.isMet = canMeetDemand;
+                        state.isMet = isMet;
                     }
                 }
 
