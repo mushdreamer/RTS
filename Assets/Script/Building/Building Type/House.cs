@@ -35,7 +35,6 @@ public class House : MonoBehaviour
         constructable = GetComponent<Constructable>();
         if (constructable == null)
         {
-            Debug.LogError("House脚本无法找到Constructable组件！");
             return;
         }
 
@@ -111,7 +110,7 @@ public class House : MonoBehaviour
     {
         if (!CanUpgrade())
         {
-            Debug.Log("升级条件未满足！");
+            Debug.Log("Upgrade Condition doesn't Fulfill！");
             return;
         }
 
@@ -126,6 +125,6 @@ public class House : MonoBehaviour
         InitializeNeeds();
         RecalculateState();
 
-        Debug.Log($"<color=cyan>房屋升级成功！现在是 {currentTier.tierName}！</color>");
+        Debug.Log($"<color=cyan>House upgrade succeed！</color>");
     }
 }

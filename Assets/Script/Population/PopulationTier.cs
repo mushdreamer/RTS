@@ -5,14 +5,14 @@ using System.Collections.Generic;
 [CreateAssetMenu(fileName = "New Population Tier", menuName = "Item and Population Tier/Population Tier")]
 public class PopulationTier : ScriptableObject
 {
-    [Header("阶层信息")]
+    [Header("Population Tier")]
     public string tierName;
     public int residentsPerHouse;
 
-    [Header("需求列表")]
+    [Header("Population Need")]
     public List<Need> needs;
 
-    [Header("升级逻辑")]
+    [Header("Upgrade Condition")]
     public PopulationTier nextTier; // <<< 新增：升级后的目标阶层
     public List<BuildRequirement> upgradeMaterials; // <<< 新增：升级需要的材料
 

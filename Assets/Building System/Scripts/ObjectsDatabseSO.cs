@@ -30,7 +30,8 @@ public enum BuildingType
     House,
     Market,
     Warehouse,
-    PowerPlant
+    PowerPlant,
+    Sawmill
 }
 
 [System.Serializable]

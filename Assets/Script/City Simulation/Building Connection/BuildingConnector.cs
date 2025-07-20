@@ -42,7 +42,6 @@ public class BuildingConnector : MonoBehaviour
     {
         if (floorData == null)
         {
-            Debug.LogError("BuildingConnector未能获取到FloorData!");
             return false;
         }
 
@@ -52,7 +51,6 @@ public class BuildingConnector : MonoBehaviour
         PlacementData placementData = floorData.GetPlacementDataAt(startBuildingPos);
         if (placementData == null)
         {
-            Debug.LogWarning($"在{startBuildingPos}处没有找到建筑数据，无法开始寻路。");
             return false;
         }
         List<Vector3Int> occupiedPositions = placementData.occupiedPositions;
@@ -85,7 +83,7 @@ public class BuildingConnector : MonoBehaviour
 
         if (positionsToVisit.Count == 0)
         {
-            Debug.LogWarning("寻路失败: 起点建筑的整个边界旁边都没有找到任何道路！");
+            Debug.LogWarning("Pathfinding Failed");
             return false;
         }
 
@@ -102,7 +100,7 @@ public class BuildingConnector : MonoBehaviour
 
                 if (neighborType == targetType)
                 {
-                    Debug.Log($"<color=cyan>成功！在 {neighborPos} 找到目标 {targetType}！</color>");
+                    Debug.Log($"<color=cyan>Succeed！We find target at {neighborPos} {targetType}！</color>");
                     return true;
                 }
 
@@ -114,7 +112,7 @@ public class BuildingConnector : MonoBehaviour
             }
         }
 
-        Debug.LogWarning("寻路结束，已探索所有可达道路，但未找到目标。");
+        Debug.LogWarning("Pathfinding end, we don't find any path");
         return false;
     }
 }
