@@ -159,29 +159,8 @@ public class ResourceManager : MonoBehaviour
     {
         OnResourceChanged -= UpdateUI;
     }
-
-    [Header("调试用的物品")]
-    public ItemData debugFishData;
-    public ItemData debugWoodData;
     void Update()
     {
-        // 按下 F 键，增加 10 单位的鱼
-        if (Input.GetKeyDown(KeyCode.F))
-        {
-            // 我们不再使用Resources.Load，直接使用在Inspector里设置好的公共变量
-            if (debugFishData != null)
-            {
-                AddWarehouseItem(debugFishData, 10);
-            }
-        }
 
-        // 按下 W 键 (Wood)，增加 10 单位的木材
-        if (Input.GetKeyDown(KeyCode.W))
-        {
-            if (debugWoodData != null)
-            {
-                AddWarehouseItem(debugWoodData, 10);
-            }
-        }
     }
 }
