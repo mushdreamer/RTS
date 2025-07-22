@@ -1,3 +1,4 @@
+// Constructable.cs - 修正版
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -25,19 +26,15 @@ public class Constructable : MonoBehaviour, IDamageable
 
     [Header("逻辑开关")]
     [Tooltip("如果此对象应作为导航障碍物，则勾选此项")]
-    public bool actsAsObstacle = true; // 默认设为true，这样您现有的建筑就不会受影响
-                                       // <<< 在这里添加新的开关 >>>
+    public bool actsAsObstacle = true;
     [Tooltip("如果此对象拥有生命值和血条，则勾选此项")]
-    public bool hasHealthSystem = true; // 默认设为true，以兼容现有建筑
+    public bool hasHealthSystem = true;
 
-    // <<< 1. 在这里添加一个公共变量，用于链接破坏特效的Prefab >>>
     [Header("Effects")]
     public GameObject destructionEffectPrefab;
 
     private void Start()
     {
-        // <<< 修改这里 >>>
-        // 只有在启用生命值系统时，才初始化生命值并更新UI
         if (hasHealthSystem)
         {
             constHealth = constMaxHealth;
@@ -47,18 +44,15 @@ public class Constructable : MonoBehaviour, IDamageable
 
     private void UpdateHealthUI()
     {
-        // <<< 修改这里 >>>
-        // 只有在启用生命值系统且healthTracker已分配时，才更新滑块
         if (hasHealthSystem && healthTracker != null)
         {
             healthTracker.UpdateSliderValue(constHealth, constMaxHealth);
         }
 
-        // 销毁逻辑保持不变，因为一个没有血条的物体也可能被摧毁
         if (constHealth <= 0)
         {
-            ResourceManager.Instance.UpdateBuildingChanged(buildingType, false, buildPosition);
-            SoundManager.Instance.PlayBuildingDestructionSound();
+            //ResourceManager.Instance.UpdateBuildingChanged(buildingType, false, buildPosition);
+            //SoundManager.Instance.PlayBuildingDestructionSound();
 
             if (destructionEffectPrefab != null)
             {
@@ -75,16 +69,14 @@ public class Constructable : MonoBehaviour, IDamageable
         {
             if (constHealth > 0 && buildPosition != Vector3.zero)
             {
-                ResourceManager.Instance.SellBuilding(buildingType);
+                //ResourceManager.Instance.SellBuilding(buildingType);
             }
         }
-        
+
     }
 
     public void TakeDamage(int damage)
     {
-        // <<< 在方法开头添加一个“守护语句” >>>
-        // 如果此对象没有生命值系统，则直接返回，不执行任何操作
         if (!hasHealthSystem) return;
 
         constHealth -= damage;
@@ -94,52 +86,42 @@ public class Constructable : MonoBehaviour, IDamageable
     public void ConstructableWasPlaced(Vector3 position, Vector3Int gridPosition)
     {
         buildPosition = position;
-
         inPreviewMode = false;
 
-        // <<< 修改这里 >>>
-        // 仅在启用生命值系统且healthTracker已分配时，才激活UI
         if (hasHealthSystem && healthTracker != null)
         {
             healthTracker.gameObject.SetActive(true);
         }
 
-        // <<< 我们在这里添加一个判断条件 >>>
-        // 只有当 actsAsObstacle 为 true 时，才去激活障碍物
         if (actsAsObstacle)
         {
             ActivateObstacle();
         }
-        // <<< 修改结束 >>>
 
-        GetComponent<ProductionBuilding>()?.ActivateBuilding();
-        GetComponent<House>()?.ActivateHouse(gridPosition); // <-- 新增了 gridPosition 参数
+        // 激活House组件（如果存在），并传入网格坐标
+        GetComponent<House>()?.ActivateHouse(gridPosition);
+
+        // ▼▼▼ 【核心修改点在这里】 ▼▼▼
+        // 激活ProductionBuilding组件（如果存在），并传入网格坐标
+        GetComponent<ProductionBuilding>()?.ActivateBuilding(gridPosition);
 
         if (isEnemy)
         {
             gameObject.tag = "Enemy";
         }
 
-        // =====================================================================
-        // <<< 在这里添加以下新代码 >>>
-
-        // 查找这个游戏对象上是否存在能源生产者组件 (IEnergyProducer)
+        // 查找和启用能源组件的逻辑...
         var producer = GetComponent<IEnergyProducer>();
-        // 如果找到了，就将该组件本身（作为MonoBehaviour）启用
         if (producer != null && producer is MonoBehaviour producerComponent)
         {
             producerComponent.enabled = true;
         }
 
-        // 同样，查找是否存在能源消费者组件 (IEnergyConsumer)
         var consumer = GetComponent<IEnergyConsumer>();
-        // 如果找到了，就启用它
         if (consumer != null && consumer is MonoBehaviour consumerComponent)
         {
             consumerComponent.enabled = true;
         }
-
-        // =====================================================================
     }
 
     private void ActivateObstacle()
@@ -150,6 +132,9 @@ public class Constructable : MonoBehaviour, IDamageable
         }
 
         obstacle = GetComponentInChildren<NavMeshObstacle>();
-        obstacle.enabled = true;
+        if (obstacle != null)
+        {
+            obstacle.enabled = true;
+        }
     }
 }

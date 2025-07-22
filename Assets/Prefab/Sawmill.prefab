@@ -262,6 +262,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   outputItem: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
   productionPerMinute: 60
+  outputAmount: 1
+  maxInternalStock: 10
+  requiredWorkforceTier: {fileID: 11400000, guid: ed990e90840912a4e8042973433c6b91,
+    type: 2}
+  requiredWorkforceAmount: 5
+  requiredBuilding: 4
 --- !u!1 &1967345765901013524
 GameObject:
   m_ObjectHideFlags: 0
