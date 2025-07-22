@@ -76,8 +76,9 @@ public class ProductionBuilding : MonoBehaviour
 
         if (AssignedWorkforce < requiredWorkforceAmount)
         {
+            // 申请工人时，把自己在哪里的信息告诉WorkforceManager
             int needed = requiredWorkforceAmount - AssignedWorkforce;
-            int newlyAssigned = WorkforceManager.Instance.RequestWorkforce(requiredWorkforceTier, needed);
+            int newlyAssigned = WorkforceManager.Instance.RequestWorkforce(requiredWorkforceTier, needed, myGridPosition);
             AssignedWorkforce += newlyAssigned;
         }
 

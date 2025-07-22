@@ -1,12 +1,12 @@
-// WorkforceManager.cs - 升级为劳动力调度中心
+// WorkforceManager.cs - 完整修正版
 using UnityEngine;
 using System.Collections.Generic;
+using System.Linq;
 
 public class WorkforceManager : MonoBehaviour
 {
     public static WorkforceManager Instance { get; private set; }
 
-    // 记录每个阶层【已分配】或【正在工作】的劳动力数量
     private Dictionary<PopulationTier, int> _assignedWorkforce = new Dictionary<PopulationTier, int>();
 
     void Awake()
@@ -15,38 +15,28 @@ public class WorkforceManager : MonoBehaviour
         else { Instance = this; }
     }
 
-    /// <summary>
-    /// 处理一个建筑的劳动力申请
-    /// </summary>
-    /// <returns>实际分配到的工人数</returns>
-    public int RequestWorkforce(PopulationTier tier, int amountRequested)
+    public int RequestWorkforce(PopulationTier tier, int amountRequested, Vector3Int buildingPosition)
     {
-        if (tier == null || amountRequested <= 0) return 0;
+        if (tier == null || amountRequested <= 0 || CityNetworkManager.Instance == null) return 0;
 
-        // 1. 计算可用的闲置劳动力
-        int totalPopulation = PopulationManager.Instance.GetPopulation(tier);
-        int currentlyAssigned = GetAssignedWorkforce(tier);
-        int availableWorkforce = totalPopulation - currentlyAssigned;
+        int networkId = CityNetworkManager.Instance.GetNetworkIdAt(buildingPosition);
+        if (networkId == -1) return 0;
 
-        // 2. 确定能分配多少人
+        int totalPopulationOnNetwork = CityNetworkManager.Instance.GetAvailablePopulationOnNetwork(networkId, tier);
+        int currentlyAssigned = GetAssignedWorkforce(tier); // 使用下面的方法获取已分配劳动力
+        int availableWorkforce = totalPopulationOnNetwork - currentlyAssigned;
+
         int amountToAssign = Mathf.Min(amountRequested, availableWorkforce);
 
-        // 3. 如果能分配到工人，则更新记录
         if (amountToAssign > 0)
         {
-            if (!_assignedWorkforce.ContainsKey(tier))
-            {
-                _assignedWorkforce[tier] = 0;
-            }
+            if (!_assignedWorkforce.ContainsKey(tier)) _assignedWorkforce[tier] = 0;
             _assignedWorkforce[tier] += amountToAssign;
         }
 
         return amountToAssign;
     }
 
-    /// <summary>
-    /// 释放一个建筑占用的劳动力
-    /// </summary>
     public void ReleaseWorkforce(PopulationTier tier, int amountToRelease)
     {
         if (tier == null || amountToRelease <= 0) return;
@@ -54,16 +44,11 @@ public class WorkforceManager : MonoBehaviour
         if (_assignedWorkforce.ContainsKey(tier))
         {
             _assignedWorkforce[tier] -= amountToRelease;
-            if (_assignedWorkforce[tier] < 0)
-            {
-                _assignedWorkforce[tier] = 0;
-            }
+            if (_assignedWorkforce[tier] < 0) _assignedWorkforce[tier] = 0;
         }
     }
 
-    /// <summary>
-    /// 获取某个阶层【已分配】的总劳动力
-    /// </summary>
+    // === 【修正】确保这个方法存在，供 GlobalStatusUI 调用 ===
     public int GetAssignedWorkforce(PopulationTier tier)
     {
         if (tier != null && _assignedWorkforce.ContainsKey(tier))
@@ -73,16 +58,9 @@ public class WorkforceManager : MonoBehaviour
         return 0;
     }
 
-    /// <summary>
-    /// 获取所有【已分配】的总劳动力
-    /// </summary>
+    // === 【修正】确保这个方法有返回值，供 GlobalStatusUI 调用 ===
     public int GetTotalAssignedWorkforce()
     {
-        int total = 0;
-        foreach (var amount in _assignedWorkforce.Values)
-        {
-            total += amount;
-        }
-        return total;
+        return _assignedWorkforce.Values.Sum();
     }
 }
