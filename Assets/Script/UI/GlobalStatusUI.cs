@@ -1,4 +1,4 @@
-// GlobalStatusUI.cs - 英文显示版本
+// GlobalStatusUI.cs - 英文显示版本 (已更新)
 using UnityEngine;
 using TMPro;
 using System.Text;
@@ -21,12 +21,13 @@ public class GlobalStatusUI : MonoBehaviour
 
         // --- 全局人口统计 (英文) ---
         int totalPop = PopulationManager.Instance.GetGrandTotalPopulation();
-        int occupiedPop = WorkforceManager.Instance.GetTotalOccupiedWorkforce();
-        int idlePop = totalPop - occupiedPop;
+        // ▼▼▼【修改点】调用了新的方法 GetTotalAssignedWorkforce ▼▼▼
+        int assignedPop = WorkforceManager.Instance.GetTotalAssignedWorkforce();
+        int idlePop = totalPop - assignedPop;
 
-        // ▼▼▼【修改点】▼▼▼
         sb.AppendLine($"Total Population: {totalPop}");
-        sb.AppendLine($"Working Population: {occupiedPop}");
+        // ▼▼▼【修改点】文本描述更新为 "Assigned" ▼▼▼
+        sb.AppendLine($"Assigned Population: {assignedPop}");
         sb.AppendLine($"Idle Population: {idlePop}");
         sb.AppendLine("---");
 
@@ -34,20 +35,20 @@ public class GlobalStatusUI : MonoBehaviour
         if (farmerTier != null)
         {
             int tierTotal = PopulationManager.Instance.GetPopulation(farmerTier);
-            int tierOccupied = WorkforceManager.Instance.GetOccupiedWorkforce(farmerTier);
+            // ▼▼▼【修改点】调用了新的方法 GetAssignedWorkforce ▼▼▼
+            int tierAssigned = WorkforceManager.Instance.GetAssignedWorkforce(farmerTier);
             float tierHappiness = PopulationManager.Instance.GetAverageHappiness(farmerTier);
 
-            // ▼▼▼【修改点】▼▼▼
-            sb.AppendLine($"Farmers: {tierTotal} (Available: {tierTotal - tierOccupied}) | Happiness: {tierHappiness:F1}");
+            sb.AppendLine($"Farmers: {tierTotal} (Available: {tierTotal - tierAssigned}) | Happiness: {tierHappiness:F1}");
         }
         if (workerTier != null)
         {
             int tierTotal = PopulationManager.Instance.GetPopulation(workerTier);
-            int tierOccupied = WorkforceManager.Instance.GetOccupiedWorkforce(workerTier);
+            // ▼▼▼【修改点】调用了新的方法 GetAssignedWorkforce ▼▼▼
+            int tierAssigned = WorkforceManager.Instance.GetAssignedWorkforce(workerTier);
             float tierHappiness = PopulationManager.Instance.GetAverageHappiness(workerTier);
 
-            // ▼▼▼【修改点】▼▼▼
-            sb.AppendLine($"Workers: {tierTotal} (Available: {tierTotal - tierOccupied}) | Happiness: {tierHappiness:F1}");
+            sb.AppendLine($"Workers: {tierTotal} (Available: {tierTotal - tierAssigned}) | Happiness: {tierHappiness:F1}");
         }
 
         statusText.text = sb.ToString();
