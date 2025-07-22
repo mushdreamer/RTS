@@ -1,4 +1,4 @@
-// GlobalStatusUI.cs
+// GlobalStatusUI.cs - 英文显示版本
 using UnityEngine;
 using TMPro;
 using System.Text;
@@ -7,6 +7,7 @@ public class GlobalStatusUI : MonoBehaviour
 {
     public TextMeshProUGUI statusText;
 
+    [Header("需要监视的人口阶层")]
     public PopulationTier farmerTier;
     public PopulationTier workerTier;
 
@@ -18,26 +19,35 @@ public class GlobalStatusUI : MonoBehaviour
 
         sb.Clear();
 
+        // --- 全局人口统计 (英文) ---
         int totalPop = PopulationManager.Instance.GetGrandTotalPopulation();
         int occupiedPop = WorkforceManager.Instance.GetTotalOccupiedWorkforce();
         int idlePop = totalPop - occupiedPop;
 
-        sb.AppendLine($"总人口: {totalPop}");
-        sb.AppendLine($"工作人口: {occupiedPop}");
-        sb.AppendLine($"闲置人口: {idlePop}");
+        // ▼▼▼【修改点】▼▼▼
+        sb.AppendLine($"Total Population: {totalPop}");
+        sb.AppendLine($"Working Population: {occupiedPop}");
+        sb.AppendLine($"Idle Population: {idlePop}");
         sb.AppendLine("---");
 
+        // --- 分阶层详细信息 (英文) ---
         if (farmerTier != null)
         {
             int tierTotal = PopulationManager.Instance.GetPopulation(farmerTier);
             int tierOccupied = WorkforceManager.Instance.GetOccupiedWorkforce(farmerTier);
-            sb.AppendLine($"可用农民: {tierTotal - tierOccupied}");
+            float tierHappiness = PopulationManager.Instance.GetAverageHappiness(farmerTier);
+
+            // ▼▼▼【修改点】▼▼▼
+            sb.AppendLine($"Farmers: {tierTotal} (Available: {tierTotal - tierOccupied}) | Happiness: {tierHappiness:F1}");
         }
         if (workerTier != null)
         {
             int tierTotal = PopulationManager.Instance.GetPopulation(workerTier);
             int tierOccupied = WorkforceManager.Instance.GetOccupiedWorkforce(workerTier);
-            sb.AppendLine($"可用工人: {tierTotal - tierOccupied}");
+            float tierHappiness = PopulationManager.Instance.GetAverageHappiness(workerTier);
+
+            // ▼▼▼【修改点】▼▼▼
+            sb.AppendLine($"Workers: {tierTotal} (Available: {tierTotal - tierOccupied}) | Happiness: {tierHappiness:F1}");
         }
 
         statusText.text = sb.ToString();

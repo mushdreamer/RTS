@@ -1,4 +1,4 @@
-// BuildingInfoPanelUI.cs
+// BuildingInfoPanelUI.cs - 最终完整版
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -24,7 +24,16 @@ public class BuildingInfoPanelUI : MonoBehaviour
         {
             UnitSelectionManager.Instance.OnSelectionChanged += HandleSelectionChanged;
         }
-        upgradeButton.onClick.AddListener(OnUpgradeButtonClicked);
+        else
+        {
+            Debug.LogError("BuildingInfoPanelUI 找不到 UnitSelectionManager 的实例！");
+        }
+
+        if (upgradeButton != null)
+        {
+            upgradeButton.onClick.AddListener(OnUpgradeButtonClicked);
+        }
+
         panel.SetActive(false);
     }
 
@@ -46,7 +55,6 @@ public class BuildingInfoPanelUI : MonoBehaviour
 
     private void HandleSelectionChanged(GameObject newSelection)
     {
-        // 只有当选中的是House时，才显示此面板
         if (newSelection != null && newSelection.TryGetComponent<House>(out House house))
         {
             _selectedHouse = house;
@@ -61,7 +69,33 @@ public class BuildingInfoPanelUI : MonoBehaviour
 
     private void UpdatePanelContents(House house)
     {
-        // ... （此方法内容保持不变，为简洁省略） ...
+        if (house == null || populationText == null || upgradeButton == null || needsContainer == null || needDisplayPrefab == null)
+        {
+            return;
+        }
+
+        populationText.text = $"Population: {house.currentResidents} / {house.maxResidents}";
+        upgradeButton.interactable = house.CanUpgrade();
+
+        foreach (GameObject item in _instantiatedNeedItems)
+        {
+            Destroy(item);
+        }
+        _instantiatedNeedItems.Clear();
+
+        if (house.trackedNeeds != null)
+        {
+            foreach (HouseNeedState needState in house.trackedNeeds)
+            {
+                GameObject newNeedItem = Instantiate(needDisplayPrefab, needsContainer);
+                var displayItem = newNeedItem.GetComponent<NeedDisplayItem>();
+                if (displayItem != null)
+                {
+                    displayItem.Setup(needState);
+                }
+                _instantiatedNeedItems.Add(newNeedItem);
+            }
+        }
     }
 
     public void OnUpgradeButtonClicked()
