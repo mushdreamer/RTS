@@ -31,7 +31,7 @@ public enum BuildingType
     Market,
     Warehouse,
     PowerPlant,
-    Sawmill
+    ProductionBuilding
 }
 
 [System.Serializable]
