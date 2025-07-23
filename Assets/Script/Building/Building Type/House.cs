@@ -64,27 +64,42 @@ public class House : MonoBehaviour
         }
     }
 
+    // House.cs - 修改后
     public void RecalculateState()
     {
         if (currentTier == null) return;
 
-        if (!isConnectedToWarehouse)
+        // ▼▼▼【核心修改点：从这里开始】▼▼▼
+
+        // 首先，判断是否连接到仓库
+        if (isConnectedToWarehouse)
         {
+            // 如果已连接，执行我们之前所有的逻辑
+            int needsMetCount = trackedNeeds.Count(n => n.isMet);
+
+            maxResidents = baseResidents + (currentTier.needs.Count * residentsPerNeedMet);
+            currentResidents = baseResidents + (needsMetCount * residentsPerNeedMet);
+            currentResidents = Mathf.Min(currentResidents, maxResidents);
+
+            currentHappiness = 10 + (needsMetCount * 2) - ((currentTier.needs.Count - needsMetCount) * 1);
+            currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
+        }
+        else
+        {
+            // 如果未连接，则不满足任何需求，且没有任何居民和幸福度
             foreach (var need in trackedNeeds)
             {
                 need.isMet = false;
             }
+
+            maxResidents = baseResidents + (currentTier.needs.Count * residentsPerNeedMet); // 最大潜力仍然可以显示
+            currentResidents = 0; // 关键！当前居民为0
+            currentHappiness = 0; // 没有居民就没有幸福度
         }
 
-        int needsMetCount = trackedNeeds.Count(n => n.isMet);
+        // ▲▲▲【核心修改点：到这里结束】▲▲▲
 
-        maxResidents = baseResidents + (currentTier.needs.Count * residentsPerNeedMet);
-        currentResidents = baseResidents + (needsMetCount * residentsPerNeedMet);
-        currentResidents = Mathf.Min(currentResidents, maxResidents);
-
-        currentHappiness = 10 + (needsMetCount * 2) - ((currentTier.needs.Count - needsMetCount) * 1);
-        currentHappiness = Mathf.Clamp(currentHappiness, 0, 20);
-
+        // 最终，无论上面哪种情况，都将计算出的（可能是0）人口数量上报
         PopulationManager.Instance.UpdatePopulationForHouse(this, currentResidents);
     }
 
