@@ -1,4 +1,4 @@
-// GlobalStatusUI.cs - 英文显示版本 (已更新)
+// GlobalStatusUI.cs - 优化版
 using UnityEngine;
 using TMPro;
 using System.Text;
@@ -19,36 +19,49 @@ public class GlobalStatusUI : MonoBehaviour
 
         sb.Clear();
 
-        // --- 全局人口统计 (英文) ---
-        int totalPop = PopulationManager.Instance.GetGrandTotalPopulation();
-        // ▼▼▼【修改点】调用了新的方法 GetTotalAssignedWorkforce ▼▼▼
-        int assignedPop = WorkforceManager.Instance.GetTotalAssignedWorkforce();
-        int idlePop = totalPop - assignedPop;
+        // --- 1. 全局总览统计 ---
+        int grandTotalPop = PopulationManager.Instance.GetGrandTotalPopulation();
+        int grandTotalAssigned = WorkforceManager.Instance.GetTotalAssignedWorkforce();
+        int grandTotalIdle = grandTotalPop - grandTotalAssigned;
 
-        sb.AppendLine($"Total Population: {totalPop}");
-        // ▼▼▼【修改点】文本描述更新为 "Assigned" ▼▼▼
-        sb.AppendLine($"Assigned Population: {assignedPop}");
-        sb.AppendLine($"Idle Population: {idlePop}");
+        sb.AppendLine("--- Global Status ---");
+        sb.AppendLine($"Total Population: {grandTotalPop}");
+        sb.AppendLine($"Assigned Population: {grandTotalAssigned}");
+        sb.AppendLine($"Idle Population: {grandTotalIdle}");
         sb.AppendLine("---");
 
-        // --- 分阶层详细信息 (英文) ---
+        // --- 2. 分阶层详细信息 (农民) ---
         if (farmerTier != null)
         {
+            sb.AppendLine($"--- {farmerTier.tierName} ---"); // 使用 tierName 动态显示阶级名
+
             int tierTotal = PopulationManager.Instance.GetPopulation(farmerTier);
-            // ▼▼▼【修改点】调用了新的方法 GetAssignedWorkforce ▼▼▼
             int tierAssigned = WorkforceManager.Instance.GetAssignedWorkforce(farmerTier);
+            int tierIdle = tierTotal - tierAssigned; // 计算该阶层的闲置人口
             float tierHappiness = PopulationManager.Instance.GetAverageHappiness(farmerTier);
 
-            sb.AppendLine($"Farmers: {tierTotal} (Available: {tierTotal - tierAssigned}) | Happiness: {tierHappiness:F1}");
+            sb.AppendLine($"Total: {tierTotal}");
+            sb.AppendLine($"Assigned: {tierAssigned}");
+            sb.AppendLine($"Idle: {tierIdle}"); // 明确显示闲置人口
+            sb.AppendLine($"Happiness: {tierHappiness:F1}");
+            sb.AppendLine("---");
         }
+
+        // --- 3. 分阶层详细信息 (工人) ---
         if (workerTier != null)
         {
+            sb.AppendLine($"--- {workerTier.tierName} ---"); // 使用 tierName 动态显示阶级名
+
             int tierTotal = PopulationManager.Instance.GetPopulation(workerTier);
-            // ▼▼▼【修改点】调用了新的方法 GetAssignedWorkforce ▼▼▼
             int tierAssigned = WorkforceManager.Instance.GetAssignedWorkforce(workerTier);
+            int tierIdle = tierTotal - tierAssigned; // 计算该阶层的闲置人口
             float tierHappiness = PopulationManager.Instance.GetAverageHappiness(workerTier);
 
-            sb.AppendLine($"Workers: {tierTotal} (Available: {tierTotal - tierAssigned}) | Happiness: {tierHappiness:F1}");
+            sb.AppendLine($"Total: {tierTotal}");
+            sb.AppendLine($"Assigned: {tierAssigned}");
+            sb.AppendLine($"Idle: {tierIdle}"); // 明确显示闲置人口
+            sb.AppendLine($"Happiness: {tierHappiness:F1}");
+            sb.AppendLine("---");
         }
 
         statusText.text = sb.ToString();

@@ -1,4 +1,4 @@
-// ProductionBuilding.cs - 添加了最终调试日志的版本
+// ProductionBuilding.cs - 【联动修复最终版】
 using UnityEngine;
 
 public class ProductionBuilding : MonoBehaviour
@@ -46,14 +46,16 @@ public class ProductionBuilding : MonoBehaviour
             return;
         }
 
+        // 【关键】将建筑自身的劳动力更新逻辑设置为定时重复执行
         InvokeRepeating(nameof(UpdateBuildingState), 1f, 2f);
     }
 
+    // 【修正】当建筑被摧毁时，调用新的单参数ReleaseWorkforce方法
     void OnDestroy()
     {
-        if (WorkforceManager.Instance != null && AssignedWorkforce > 0)
+        if (WorkforceManager.Instance != null)
         {
-            WorkforceManager.Instance.ReleaseWorkforce(requiredWorkforceTier, AssignedWorkforce);
+            WorkforceManager.Instance.ReleaseWorkforce(this.gameObject);
         }
     }
 
@@ -63,25 +65,24 @@ public class ProductionBuilding : MonoBehaviour
 
         IsConnected = BuildingConnector.Instance.CheckConnection(myGridPosition, requiredBuilding);
 
+        // 如果断开连接，就释放所有工人并停止计算
         if (!IsConnected)
         {
             if (AssignedWorkforce > 0)
             {
-                WorkforceManager.Instance.ReleaseWorkforce(requiredWorkforceTier, AssignedWorkforce);
-                AssignedWorkforce = 0;
+                // 【修正】调用新的单参数ReleaseWorkforce方法
+                WorkforceManager.Instance.ReleaseWorkforce(this.gameObject);
+                AssignedWorkforce = 0; // 立即更新本地状态
             }
             CurrentEfficiency = 0;
             return;
         }
 
-        if (AssignedWorkforce < requiredWorkforceAmount)
-        {
-            // 申请工人时，把自己在哪里的信息告诉WorkforceManager
-            int needed = requiredWorkforceAmount - AssignedWorkforce;
-            int newlyAssigned = WorkforceManager.Instance.RequestWorkforce(requiredWorkforceTier, needed, myGridPosition);
-            AssignedWorkforce += newlyAssigned;
-        }
+        // 【修正】持续请求（或“续约”）劳动力，并用返回的实际数量更新本地状态
+        // 这确保了如果劳动力被WorkforceManager回收，这里能立刻知道
+        AssignedWorkforce = WorkforceManager.Instance.RequestWorkforce(requiredWorkforceTier, requiredWorkforceAmount, this.gameObject);
 
+        // 基于实际拥有的工人数计算效率
         if (requiredWorkforceAmount > 0)
         {
             CurrentEfficiency = (float)AssignedWorkforce / requiredWorkforceAmount;
@@ -94,14 +95,7 @@ public class ProductionBuilding : MonoBehaviour
 
     void Update()
     {
-        // ▼▼▼【核心侦探日志】▼▼▼
-        // 每隔60帧打印一次生产条件的状态，避免刷屏
-        if (Time.frameCount % 60 == 0)
-        {
-            Debug.Log($"[生产检查] 名称: {gameObject.name} | 已激活: {isActivated} | 已连接: {IsConnected} | 库存未满: {CurrentInternalStock < maxInternalStock} | 效率>0: {CurrentEfficiency > 0}");
-        }
-        // ▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲▲
-
+        // 生产逻辑保持不变...
         if (isActivated && IsConnected && CurrentInternalStock < maxInternalStock && CurrentEfficiency > 0)
         {
             timer += Time.deltaTime * CurrentEfficiency;
@@ -117,7 +111,6 @@ public class ProductionBuilding : MonoBehaviour
             timer = 0f;
         }
 
-        // （库存转移逻辑可以放在这里，或者在UpdateBuildingState里）
         TryTransferStockToWarehouse();
     }
 
