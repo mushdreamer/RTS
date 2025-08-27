@@ -231,6 +231,51 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
+--- !u!1 &129071542
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 129071544}
+  - component: {fileID: 129071543}
+  m_Layer: 0
+  m_Name: CityRulesManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!114 &129071543
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129071542}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: fe729114aa4f7f74596d812f95d0771e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  requireRoadsForConnection: 0
+--- !u!4 &129071544
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 129071542}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 418.8946, y: 239.60344, z: -477.1276}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &131464437
 GameObject:
   m_ObjectHideFlags: 0
@@ -933,8 +978,6 @@ MonoBehaviour:
   creditsUI: {fileID: 1503583755}
   allExistingBuildings: 
   placementSystem: {fileID: 1604156578}
-  debugFishData: {fileID: 11400000, guid: 76afc543c8feb164d9a8061d407a2e9d, type: 2}
-  debugWoodData: {fileID: 11400000, guid: 4fa89630f85a0cb45b848d441a8a6d2a, type: 2}
 --- !u!114 &401350755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3267,7 +3310,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.6
+  m_fontSize: 26.7
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6219,7 +6262,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 47.15
+  m_fontSize: 47.3
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7703,4 +7746,5 @@ SceneRoots:
   - {fileID: 550238133}
   - {fileID: 563033272}
   - {fileID: 1117056785}
+  - {fileID: 129071544}
   - {fileID: 1459792220}
