@@ -53,6 +53,30 @@ public class PlacementSystem : MonoBehaviour
         inputManager.OnExit += EndSelling;
     }
 
+    // ▼▼▼ 【新增代码】 ▼▼▼
+    /// <summary>
+    /// 根据世界坐标清除一个建筑的占位数据
+    /// </summary>
+    /// <param name="position">建筑所在的世界坐标</param>
+    public void ClearBuildingDataAt(Vector3 position)
+    {
+        Vector3Int gridPosition = grid.WorldToCell(position);
+
+        // 我们需要检查两个数据层，因为我们不确定建筑在哪一层
+        // 通常建筑都在 floorData，但这样做更健壮
+        if (furnitureData.GetObjectTypeAt(gridPosition) != BuildingType.None)
+        {
+            furnitureData.RemoveObjectAt(gridPosition);
+        }
+
+        if (floorData.GetObjectTypeAt(gridPosition) != BuildingType.None)
+        {
+            floorData.RemoveObjectAt(gridPosition);
+        }
+    }
+    // ▲▲▲ 【新增代码结束】 ▲▲▲
+
+
     private void EndSelling()
     {
         inSellMode = false;

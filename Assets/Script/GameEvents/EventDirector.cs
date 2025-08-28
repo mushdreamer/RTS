@@ -12,28 +12,17 @@ public class EventDirector : MonoBehaviour
     [Tooltip("List of all possible game events")]
     public List<GameEvent> allEvents;
 
-    [Header("Trigger Timing")]
-    [Tooltip("Minimum interval (in seconds) before trying to trigger the next event")]
-    public float minTimeBetweenEvents = 20f;
-    [Tooltip("Maximum interval (in seconds) before trying to trigger the next event")]
-    public float maxTimeBetweenEvents = 60f;
+    // --- 以下计时器相关变量已被移除 ---
+    // public float minTimeBetweenEvents = 20f;
+    // public float maxTimeBetweenEvents = 60f;
+    // private float timer;
 
     [Header("Current Game State (Example)")]
-    public int currentGameDay = 1; // 游戏进行的天数
+    // --- currentGameDay 已被移除，将从TimeManager获取 ---
     public int playerPopulation = 3; // 玩家人口
     // ... 在这里添加更多你需要追踪的游戏状态
 
-    private float timer;
-
-    // --- 2. 添加这两个公共静态事件 ---
-    /// <summary>
-    /// 当计时器更新时触发，广播剩余时间
-    /// </summary>
-    public static event Action<float> OnTimerUpdated;
-
-    /// <summary>
-    /// 当一个事件被选中并触发时，广播这个事件的数据
-    /// </summary>
+    // --- OnTimerUpdated不再需要，但OnEventTriggered仍然有用 ---
     public static event Action<GameEvent> OnEventTriggered;
 
     private void Awake()
@@ -49,49 +38,44 @@ public class EventDirector : MonoBehaviour
         }
     }
 
+    // 当脚本启用时，订阅事件
+    private void OnEnable()
+    {
+        TimeManager.OnDayChanged += HandleNewDay;
+    }
+
+    // 当脚本禁用时，取消订阅，防止内存泄漏
+    private void OnDisable()
+    {
+        TimeManager.OnDayChanged -= HandleNewDay;
+    }
+
     private void Start()
     {
-        // 在这里加入这行调试代码！
-        /*Debug.Log($"当前计时器: {timer}");
-
-        timer -= Time.deltaTime;
-        if (timer <= 0)
-        {
-            TryTriggerEvent();
-            ResetTimer();
-        }*/
-        ResetTimer();
+        Debug.Log("EventDirector 已激活，正在等待新的一天...");
     }
 
-    private void Update()
+    // --- Update() 方法中的计时逻辑已不再需要 ---
+
+    /// <summary>
+    /// 这个方法会在TimeManager广播OnDayChanged事件时被自动调用
+    /// </summary>
+    private void HandleNewDay(int newDay)
     {
-        timer -= Time.deltaTime;
-
-        // --- 3. 在Update中广播计时器更新事件 ---
-        OnTimerUpdated?.Invoke(timer);
-        // ------------------------------------
-
-        if (timer <= 0)
-        {
-            TryTriggerEvent();
-            ResetTimer();
-        }
+        Debug.Log($"新的一天到来了 (第 {newDay} 天). 正在尝试触发随机事件...");
+        TryTriggerEvent();
     }
 
-    private void ResetTimer()
-    {
-        timer = UnityEngine.Random.Range(minTimeBetweenEvents, maxTimeBetweenEvents);
-        Debug.Log($"Next event will be triggered after {Mathf.RoundToInt(timer)} seconds");
-    }
-
+    /// <summary>
+    /// 尝试触发一个事件。核心的加权随机逻辑保持不变。
+    /// </summary>
     public void TryTriggerEvent()
     {
-        // ... (筛选和加权随机选择的代码保持不变) ...
         List<GameEvent> validEvents = allEvents.Where(e => e.AreConditionsMet(this)).ToList();
 
         if (validEvents.Count == 0)
         {
-            Debug.Log("No Event Condition!");
+            Debug.Log("今天没有满足条件的事件可以触发。");
             return;
         }
 
@@ -109,15 +93,26 @@ public class EventDirector : MonoBehaviour
             randomPoint -= e.baseWeight;
         }
 
-
         if (chosenEvent != null)
         {
-            // --- 4. 在执行事件前，广播事件触发信息 ---
             OnEventTriggered?.Invoke(chosenEvent);
-            // ----------------------------------------
-
-            // 然后再执行事件本身
             chosenEvent.Execute();
+            Debug.Log($"事件已触发: [{chosenEvent.eventName}]");
         }
+    }
+
+    // --- 新增一个公共方法，用于给GameEvent查询当前的总天数 ---
+    /// <summary>
+    /// 从TimeManager获取当前游戏的总共通行天数
+    /// </summary>
+    public int GetCurrentTotalDays()
+    {
+        if (TimeManager.Instance != null)
+        {
+            return TimeManager.Instance.GetTotalDaysPassed();
+        }
+
+        Debug.LogWarning("无法找到TimeManager实例！返回天数为0。");
+        return 0;
     }
 }

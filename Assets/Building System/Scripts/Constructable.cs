@@ -22,6 +22,11 @@ public class Constructable : MonoBehaviour, IDamageable
 
     public Vector3 buildPosition;
 
+    // ▼▼▼ 【新增代码】 ▼▼▼
+    // 用于找到PlacementSystem，这里我们假设场景中只有一个
+    private PlacementSystem placementSystem;
+    // ▲▲▲ 【新增代码结束】 ▲▲▲
+
     public bool inPreviewMode;
 
     [Header("逻辑开关")]
@@ -35,6 +40,11 @@ public class Constructable : MonoBehaviour, IDamageable
 
     private void Start()
     {
+        // ▼▼▼ 【新增代码】 ▼▼▼
+        // 在Start时找到PlacementSystem的实例
+        placementSystem = FindObjectOfType<PlacementSystem>();
+        // ▲▲▲ 【新增代码结束】 ▲▲▲
+
         if (hasHealthSystem)
         {
             constHealth = constMaxHealth;
@@ -51,6 +61,19 @@ public class Constructable : MonoBehaviour, IDamageable
 
         if (constHealth <= 0)
         {
+            // ▼▼▼ 【核心修正点】 ▼▼▼
+            // 在销毁对象之前，先通知PlacementSystem清除这块地的数据
+            if (placementSystem != null)
+            {
+                placementSystem.ClearBuildingDataAt(buildPosition);
+            }
+            else
+            {
+                Debug.LogError("Constructable 无法找到 PlacementSystem! 网格数据可能没有被正确清除。");
+            }
+            // ▲▲▲ 【核心修正点结束】 ▲▲▲
+
+
             //ResourceManager.Instance.UpdateBuildingChanged(buildingType, false, buildPosition);
             //SoundManager.Instance.PlayBuildingDestructionSound();
 

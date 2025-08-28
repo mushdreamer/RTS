@@ -29,14 +29,25 @@ public class GameEvent : ScriptableObject
     /// </summary>
     /// <param name="director">事件导演，用于获取当前游戏状态</param>
     /// <returns>如果满足条件则返回true</returns>
+    /// <summary>
+    /// 检查当前游戏状态是否满足此事件的触发条件
+    /// </summary>
+    /// <param name="director">事件导演，用于获取当前游戏状态</param>
+    /// <returns>如果满足条件则返回true</returns>
     public bool AreConditionsMet(EventDirector director)
     {
+        // 从director获取当前游戏的总天数
+        int totalDaysPassed = director.GetCurrentTotalDays();
+
         // 检查游戏天数
-        if (director.currentGameDay < minGameDays) return false;
-        if (maxGameDays > 0 && director.currentGameDay > maxGameDays) return false;
+        if (totalDaysPassed < minGameDays) return false;
+        if (maxGameDays > 0 && totalDaysPassed > maxGameDays) return false;
 
         // 在这里可以添加更多的条件检查
-        // 例如：检查玩家人口、财富、所在地图、已研究科技等
+        // 例如：检查季节
+        // if (TimeManager.Instance.CurrentSeason != TimeManager.Season.Winter) return false;
+
+        // 例如：检查玩家人口
         // if (director.playerPopulation < 5) return false;
 
         return true;

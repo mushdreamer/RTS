@@ -93,6 +93,16 @@ public class CityNetworkManager : MonoBehaviour
     // 辅助方法，用于为网络增加人口
     private void AddPopulationToNetwork(int networkId, (PopulationTier tier, int count) popData)
     {
+        // ▼▼▼【BUG修复代码：从这里开始】▼▼▼
+        // 在处理数据前，先检查传入的人口阶层（tier）是否为null。
+        // 如果是null，说明这个房屋的数据可能已经损坏或正在被销毁。
+        // 此时我们应该直接忽略它，不进行任何操作，以防止程序崩溃。
+        if (popData.tier == null)
+        {
+            return; // 直接退出方法，不处理这条无效数据
+        }
+        // ▲▲▲【BUG修复代码：到这里结束】▲▲▲
+
         if (!_populationByNetwork.ContainsKey(networkId))
         {
             _populationByNetwork[networkId] = new Dictionary<PopulationTier, int>();
