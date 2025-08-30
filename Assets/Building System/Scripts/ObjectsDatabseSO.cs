@@ -31,7 +31,10 @@ public enum BuildingType
     Market,
     Warehouse,
     PowerPlant,
-    ProductionBuilding
+    TransmissionTower,
+    ProductionBuilding,
+    Institute,
+    Bank
 }
 
 [System.Serializable]

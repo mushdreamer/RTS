@@ -978,6 +978,8 @@ MonoBehaviour:
   creditsUI: {fileID: 1503583755}
   allExistingBuildings: 
   placementSystem: {fileID: 1604156578}
+  money: 1000
+  bankExists: 0
 --- !u!114 &401350755
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -3307,7 +3309,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 26.2
+  m_fontSize: 28.15
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -6526,7 +6528,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 46.4
+  m_fontSize: 49.85
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1

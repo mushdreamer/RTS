@@ -1,4 +1,4 @@
-// ResourceManager.cs - 已修正版本
+// ResourceManager.cs - 修正版本
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -21,7 +21,7 @@ public class ResourceManager : MonoBehaviour
     }
 
     // --- 信用点（Credits）管理 ---
-    private int credits = 60;
+    private int credits = 60; // 用于建造的信用点
     public TextMeshProUGUI creditsUI;
     public enum ResourcesType
     {
@@ -32,14 +32,30 @@ public class ResourceManager : MonoBehaviour
     private Dictionary<ItemData, float> _itemStock = new Dictionary<ItemData, float>();
 
     // --- 事件和系统引用 ---
-    public event Action OnResourceChanged;
+    public event Action OnResourceChanged; // 用于信用点和物品库存变化
     public event Action OnBuildingsChanged;
     public List<BuildingType> allExistingBuildings;
     public PlacementSystem placementSystem;
 
+    // ▼▼▼【修正部分】▼▼▼
+    // --- 经济系统 (银行与资金) ---
+    [Header("经济系统 (银行与资金)")]
+    [SerializeField] private float money = 1000f; // 初始资金，用于科研等
+    public float Money => money; // 公开的只读属性，用于访问资金
+
+    [SerializeField] private bool bankExists = false;
+    public bool BankExists => bankExists; // 公开的只读属性
+
+    // 资金变化事件
+    public event Action<float> OnMoneyChanged;
+    // ▲▲▲【修正部分结束】▲▲▲
+
+
     private void Start()
     {
         UpdateUI();
+        // 首次启动时，手动触发一次资金UI更新
+        OnMoneyChanged?.Invoke(money);
     }
 
     public void UpdateBuildingChanged(BuildingType buildingType, bool isNew, Vector3 position)
@@ -65,32 +81,20 @@ public class ResourceManager : MonoBehaviour
         {
             if (obj.thisBuildingType == buildingType)
             {
-                // --- 修改点 1 ---
-                // 不再需要遍历resourceRequirements来找价格，直接读取creditCost
                 sellingPrice = obj.creditCost;
-                break; // 找到对应的建筑后就可以跳出循环
+                break;
             }
         }
         int amountToReturn = (int)(sellingPrice * 0.50f);
         IncreaseResource(ResourcesType.Credits, amountToReturn);
-
-        // (可选) 未来你也可以在这里添加返还部分建造物资的逻辑
     }
 
-    // 这个方法在建筑被成功放置后调用，用来扣除资源
     internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
     {
-        // --- 修改点 2 ---
-        // 分别扣除信用点和物资
-
-        // 1. 扣除信用点
         DecreaseResource(ResourcesType.Credits, objectData.creditCost);
 
-        // 2. 扣除物资
         foreach (BuildRequirement req in objectData.materialRequirements)
         {
-            // 这里我们用TryConsume，因为它更安全。
-            // 理论上此时资源一定是足够的，因为BuySlot已经检查过了。
             TryConsumeWarehouseItem(req.item, req.amount);
         }
     }
@@ -159,6 +163,41 @@ public class ResourceManager : MonoBehaviour
     {
         OnResourceChanged -= UpdateUI;
     }
+
+    #region Bank and Money System
+
+    public void RegisterBank()
+    {
+        bankExists = true; // 【修正】现在修改私有字段
+        Debug.Log("Bank has been built. Profits will now be collected.");
+    }
+
+    public void UnregisterBank()
+    {
+        bankExists = false; // 【修正】现在修改私有字段
+        Debug.Log("Bank has been destroyed. Profits will no longer be collected.");
+    }
+
+    public void AddMoney(float amount)
+    {
+        if (amount <= 0) return;
+        money += amount; // 【修正】现在修改私有字段
+        OnMoneyChanged?.Invoke(money);
+    }
+
+    public bool TrySpendMoney(float amount)
+    {
+        if (money >= amount)
+        {
+            money -= amount; // 【修正】现在修改私有字段
+            OnMoneyChanged?.Invoke(money);
+            return true;
+        }
+        return false;
+    }
+
+    #endregion
+
     void Update()
     {
 

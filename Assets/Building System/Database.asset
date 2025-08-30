@@ -70,7 +70,7 @@ MonoBehaviour:
     <benefits>k__BackingField: []
   - <Name>k__BackingField: Sawmill
     <ID>k__BackingField: 5
-    <thisBuildingType>k__BackingField: 6
+    <thisBuildingType>k__BackingField: 7
     description: 
     <Size>k__BackingField: {x: 1, y: 1}
     <Prefab>k__BackingField: {fileID: 1172265596729933721, guid: 2d38483c0f67c7543ad5529fda49f240,
@@ -81,11 +81,41 @@ MonoBehaviour:
     <benefits>k__BackingField: []
   - <Name>k__BackingField: Slaughter House
     <ID>k__BackingField: 6
-    <thisBuildingType>k__BackingField: 6
+    <thisBuildingType>k__BackingField: 7
     description: 
     <Size>k__BackingField: {x: 1, y: 1}
     <Prefab>k__BackingField: {fileID: 1001792067179033358, guid: bf379bd35241fde4e9219d294e90bddf,
       type: 3}
+    <creditCost>k__BackingField: 2
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 
+    <benefits>k__BackingField: []
+  - <Name>k__BackingField: TransmissionTower
+    <ID>k__BackingField: 7
+    <thisBuildingType>k__BackingField: 6
+    description: 
+    <Size>k__BackingField: {x: 2, y: 2}
+    <Prefab>k__BackingField: {fileID: 0}
+    <creditCost>k__BackingField: 2
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 
+    <benefits>k__BackingField: []
+  - <Name>k__BackingField: Institute
+    <ID>k__BackingField: 8
+    <thisBuildingType>k__BackingField: 8
+    description: 
+    <Size>k__BackingField: {x: 2, y: 2}
+    <Prefab>k__BackingField: {fileID: 0}
+    <creditCost>k__BackingField: 2
+    <materialRequirements>k__BackingField: []
+    <buildDependency>k__BackingField: 
+    <benefits>k__BackingField: []
+  - <Name>k__BackingField: Bank
+    <ID>k__BackingField: 9
+    <thisBuildingType>k__BackingField: 9
+    description: 
+    <Size>k__BackingField: {x: 2, y: 2}
+    <Prefab>k__BackingField: {fileID: 0}
     <creditCost>k__BackingField: 2
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
