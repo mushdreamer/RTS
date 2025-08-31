@@ -613,7 +613,7 @@ GameObject:
   - component: {fileID: 7926864363439269603}
   - component: {fileID: 7406046176378490970}
   m_Layer: 10
-  m_Name: Power Plant
+  m_Name: Transmission Tower
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

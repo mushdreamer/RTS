@@ -57,12 +57,12 @@ MonoBehaviour:
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
     <benefits>k__BackingField: []
-  - <Name>k__BackingField: PowerPlant
+  - <Name>k__BackingField: Coal Power Plant
     <ID>k__BackingField: 4
     <thisBuildingType>k__BackingField: 5
     description: 
-    <Size>k__BackingField: {x: 2, y: 2}
-    <Prefab>k__BackingField: {fileID: 6894239926297190709, guid: ba6244778a8aad542abb534feb299990,
+    <Size>k__BackingField: {x: 3, y: 3}
+    <Prefab>k__BackingField: {fileID: 1121128016018608866, guid: 530721c055eea344ea2ee22367cfe155,
       type: 3}
     <creditCost>k__BackingField: 5
     <materialRequirements>k__BackingField: []
@@ -90,13 +90,14 @@ MonoBehaviour:
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
     <benefits>k__BackingField: []
-  - <Name>k__BackingField: TransmissionTower
+  - <Name>k__BackingField: Transmission Tower
     <ID>k__BackingField: 7
     <thisBuildingType>k__BackingField: 6
     description: 
     <Size>k__BackingField: {x: 2, y: 2}
-    <Prefab>k__BackingField: {fileID: 0}
-    <creditCost>k__BackingField: 2
+    <Prefab>k__BackingField: {fileID: 6894239926297190709, guid: ba6244778a8aad542abb534feb299990,
+      type: 3}
+    <creditCost>k__BackingField: 5
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
     <benefits>k__BackingField: []
@@ -115,7 +116,8 @@ MonoBehaviour:
     <thisBuildingType>k__BackingField: 9
     description: 
     <Size>k__BackingField: {x: 2, y: 2}
-    <Prefab>k__BackingField: {fileID: 0}
+    <Prefab>k__BackingField: {fileID: 4497364455410072805, guid: 67cb4f9d9b8039742b009446980b7d47,
+      type: 3}
     <creditCost>k__BackingField: 2
     <materialRequirements>k__BackingField: []
     <buildDependency>k__BackingField: 
