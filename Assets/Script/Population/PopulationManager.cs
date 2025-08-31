@@ -1,4 +1,4 @@
-// PopulationManager.cs - 最终修正版
+// PopulationManager.cs - Final Corrected Version
 using UnityEngine;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,9 +11,11 @@ public class PopulationManager : MonoBehaviour
     private Dictionary<PopulationTier, List<House>> _housesByTier = new Dictionary<PopulationTier, List<House>>();
     private Dictionary<House, int> _populationPerHouse = new Dictionary<House, int>();
 
-    [Header("更新设置")]
-    [Tooltip("每隔多少秒进行一次总需求计算")]
+    [Header("Update Settings")]
     public float needsUpdateInterval = 2.0f;
+
+    private TransmissionTower[] allTowers;
+    private Dictionary<TransmissionTower, int> towerConnectionCounts = new Dictionary<TransmissionTower, int>();
 
     void Awake()
     {
@@ -26,72 +28,56 @@ public class PopulationManager : MonoBehaviour
         InvokeRepeating(nameof(UpdateAllTierNeeds), needsUpdateInterval, needsUpdateInterval);
     }
 
-    /// <summary>
-    /// 【核心逻辑重写】
-    /// </summary>
+    private void FindAllTowers()
+    {
+        allTowers = FindObjectsOfType<TransmissionTower>();
+    }
+
     private void UpdateAllTierNeeds()
     {
-        if (_housesByTier.Keys.Count == 0 || BuildingConnector.Instance == null) return;
+        if (_housesByTier.Keys.Count == 0) return;
 
-        // 1. 先更新所有房屋的连接状态
+        FindAllTowers();
+        towerConnectionCounts.Clear();
+        foreach (var tower in allTowers)
+        {
+            if (tower.IsPowered)
+            {
+                towerConnectionCounts[tower] = 0;
+            }
+        }
+
         foreach (var houseList in _housesByTier.Values)
         {
             foreach (var house in houseList)
             {
-                house.isConnectedToWarehouse = BuildingConnector.Instance.CheckConnection(house.GetGridPosition(), BuildingType.Warehouse);
+                if (BuildingConnector.Instance != null)
+                {
+                    house.isConnectedToWarehouse = BuildingConnector.Instance.CheckConnection(house.GetGridPosition(), BuildingType.Warehouse);
+                }
             }
         }
 
-        // 2. 遍历每一个人口阶层
         foreach (PopulationTier tier in _housesByTier.Keys.ToList())
         {
             if (_housesByTier[tier].Count == 0) continue;
-
-            // 3. 对该阶层的每一个需求（如鱼、衣服）进行独立计算
             foreach (Need need in tier.needs)
             {
-                // 筛选出所有已连接到仓库的房屋
-                var connectedHouses = _housesByTier[tier].Where(h => h.isConnectedToWarehouse).ToList();
-                int connectedHouseCount = connectedHouses.Count;
-
-                // 如果没有任何房屋连接，则该需求对所有房屋都不满足
-                if (connectedHouseCount == 0)
+                switch (need.item.itemName)
                 {
-                    foreach (var house in _housesByTier[tier])
-                    {
-                        var state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
-                        if (state != null) state.isMet = false;
-                    }
-                    continue; // 继续检查下一个需求
-                }
-
-                // 计算已连接房屋的总需求量
-                float consumptionRate = (need.consumptionPerMinute / 60f) * needsUpdateInterval;
-                float totalDemand = consumptionRate * connectedHouseCount;
-
-                // 检查仓库是否有足够的物资来满足这些已连接的房屋
-                bool canMeetDemand = ResourceManager.Instance.GetWarehouseStock(need.item) >= totalDemand;
-
-                // 如果可以满足，则消耗资源
-                if (canMeetDemand)
-                {
-                    ResourceManager.Instance.TryConsumeWarehouseItem(need.item, totalDemand);
-                }
-
-                // 4. 最后，根据连接状态和物资满足情况，更新每一个房屋的需求状态
-                foreach (var house in _housesByTier[tier])
-                {
-                    var state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
-                    if (state != null)
-                    {
-                        // 需求被满足的条件是：房屋已连接 并且 物资充足
-                        state.isMet = house.isConnectedToWarehouse && canMeetDemand;
-                    }
+                    case "Fish":
+                        ProcessStandardNeed(tier, need);
+                        break;
+                    case "Electricity":
+                        ProcessElectricityNeed(tier, need);
+                        break;
+                    default:
+                        ProcessStandardNeed(tier, need);
+                        break;
                 }
             }
         }
 
-        // 5. 在所有计算结束后，命令所有房屋根据最新的需求满足状态，更新自己的人口和幸福度
         foreach (var houseList in _housesByTier.Values)
         {
             foreach (var house in houseList)
@@ -101,8 +87,80 @@ public class PopulationManager : MonoBehaviour
         }
     }
 
-    // --- 后续方法保持不变 ---
+    private void ProcessStandardNeed(PopulationTier tier, Need need)
+    {
+        var connectedHouses = _housesByTier[tier].Where(h => h.isConnectedToWarehouse).ToList();
+        if (connectedHouses.Count == 0)
+        {
+            SetNeedStatusForAllHouses(tier, need, false);
+            return;
+        }
+        float consumptionRate = (need.consumptionPerMinute / 60f) * needsUpdateInterval;
+        float totalDemand = consumptionRate * connectedHouses.Count;
+        bool canMeetDemand = ResourceManager.Instance.GetWarehouseStock(need.item) >= totalDemand;
+        if (canMeetDemand)
+        {
+            ResourceManager.Instance.TryConsumeWarehouseItem(need.item, totalDemand);
+            if (need.item.itemName == "Fish" && ResourceManager.Instance.BankExists)
+            {
+                float profitPerUnit = 2.5f;
+                float totalProfit = totalDemand * profitPerUnit;
+                ResourceManager.Instance.AddMoney(totalProfit);
+            }
+        }
+        foreach (var house in _housesByTier[tier])
+        {
+            var state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
+            if (state != null)
+            {
+                state.isMet = house.isConnectedToWarehouse && canMeetDemand;
+            }
+        }
+    }
 
+    private void ProcessElectricityNeed(PopulationTier tier, Need need)
+    {
+        foreach (var house in _housesByTier[tier])
+        {
+            bool isCoveredAndHasCapacity = TryFindAvailableTowerForHouse(house);
+
+            var state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
+            if (state != null)
+            {
+                state.isMet = isCoveredAndHasCapacity;
+            }
+        }
+    }
+
+    private bool TryFindAvailableTowerForHouse(House house)
+    {
+        foreach (var tower in towerConnectionCounts.Keys)
+        {
+            if (towerConnectionCounts[tower] >= tower.maxHouseConnections)
+            {
+                continue;
+            }
+
+            float distance = Vector3.Distance(house.transform.position, tower.transform.position);
+            if (distance <= tower.coverageRadius)
+            {
+                towerConnectionCounts[tower]++;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void SetNeedStatusForAllHouses(PopulationTier tier, Need need, bool isMet)
+    {
+        foreach (var house in _housesByTier[tier])
+        {
+            var state = house.trackedNeeds.FirstOrDefault(n => n.associatedNeed == need);
+            if (state != null) state.isMet = isMet;
+        }
+    }
+
+    #region House Registration
     public void RegisterHouse(House house)
     {
         PopulationTier tier = house.currentTier;
@@ -133,13 +191,16 @@ public class PopulationManager : MonoBehaviour
     {
         int oldAmount = _populationPerHouse.ContainsKey(house) ? _populationPerHouse[house] : 0;
         _populationPerHouse[house] = newAmount;
-
         int difference = newAmount - oldAmount;
         if (house.currentTier != null && _totalPopulationByTier.ContainsKey(house.currentTier))
         {
             _totalPopulationByTier[house.currentTier] += difference;
         }
     }
+    #endregion
+
+    // ▼▼▼【RE-ADDED PUBLIC METHODS】▼▼▼
+    #region Public Getters for UI and other Managers
 
     public int GetPopulation(PopulationTier tier)
     {
@@ -163,4 +224,7 @@ public class PopulationManager : MonoBehaviour
     {
         return _totalPopulationByTier.Values.Sum();
     }
+
+    #endregion
+    // ▲▲▲【RE-ADDED PUBLIC METHODS END】▲▲▲
 }
