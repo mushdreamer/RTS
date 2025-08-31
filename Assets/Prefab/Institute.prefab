@@ -334,7 +334,6 @@ GameObject:
   - component: {fileID: 5695930020337438811}
   - component: {fileID: 7304666122664193344}
   - component: {fileID: 3136988630325493547}
-  - component: {fileID: 8116999096300256341}
   m_Layer: 10
   m_Name: Institute
   m_TagString: Untagged
@@ -401,20 +400,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8116999096300256341
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 6011239493346043550}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff40a6e23c8c4b24b980eac4de68a8da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxProduction: 10
-  sunIntensity: 1
 --- !u!1 &7236368170167946142
 GameObject:
   m_ObjectHideFlags: 0

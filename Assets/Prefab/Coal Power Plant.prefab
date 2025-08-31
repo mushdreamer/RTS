@@ -161,7 +161,6 @@ GameObject:
   - component: {fileID: 4763791874201952276}
   - component: {fileID: 4184999350984380190}
   - component: {fileID: 3858662735641025653}
-  - component: {fileID: 8912811740251986329}
   m_Layer: 10
   m_Name: Coal Power Plant
   m_TagString: Untagged
@@ -228,20 +227,6 @@ BoxCollider:
   serializedVersion: 3
   m_Size: {x: 1, y: 1, z: 1}
   m_Center: {x: 0, y: 0, z: 0}
---- !u!114 &8912811740251986329
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1121128016018608866}
-  m_Enabled: 0
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ff40a6e23c8c4b24b980eac4de68a8da, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  maxProduction: 10
-  sunIntensity: 1
 --- !u!1 &3668304174304110648
 GameObject:
   m_ObjectHideFlags: 0
