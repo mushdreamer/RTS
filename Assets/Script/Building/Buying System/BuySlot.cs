@@ -1,4 +1,4 @@
-// BuySlot.cs - 已修正版本
+// BuySlot.cs - 修正版本
 using System;
 using UnityEngine;
 using UnityEngine.UI;
@@ -17,6 +17,9 @@ public class BuySlot : MonoBehaviour
     private void Start()
     {
         ResourceManager.Instance.OnResourceChanged += HandleResourcesChanged;
+        // 【新增】订阅新的 OnMoneyChanged 事件
+        ResourceManager.Instance.OnMoneyChanged += HandleMoneyChanged;
+
         HandleResourcesChanged();
 
         ResourceManager.Instance.OnBuildingsChanged += HandleBuildingsChanged;
@@ -36,6 +39,8 @@ public class BuySlot : MonoBehaviour
         if (ResourceManager.Instance != null)
         {
             ResourceManager.Instance.OnResourceChanged -= HandleResourcesChanged;
+            // 【新增】取消订阅
+            ResourceManager.Instance.OnMoneyChanged -= HandleMoneyChanged;
             ResourceManager.Instance.OnBuildingsChanged -= HandleBuildingsChanged;
         }
     }
@@ -54,40 +59,45 @@ public class BuySlot : MonoBehaviour
         }
     }
 
-    // --- 修改点 3：完全重写此方法 ---
+    // 【新增】专门处理资金变化的轻量方法
+    private void HandleMoneyChanged(float newAmount)
+    {
+        // 资金变化时，重新检查一次可用性
+        HandleResourcesChanged();
+    }
+
+    // --- 【核心修改点】---
     private void HandleResourcesChanged()
     {
-        ObjectData objectData = DatabaseManager.Instance.databaseSO.objectsData[databaseItemID];
+        ObjectData objectData = DatabaseManager.Instance.databaseSO.GetObjectByID(databaseItemID);
 
         bool requirementsMet = true;
 
-        // 1. 检查信用点（Credits）是否足够
-        if (ResourceManager.Instance.GetCredits() < objectData.creditCost)
+        // 1. 【修改】检查资金 (Money) 是否足够
+        if (ResourceManager.Instance.Money < objectData.creditCost)
         {
             requirementsMet = false;
         }
         else
         {
-            // 2. 如果信用点足够，再逐一检查每种物资（Materials）
+            // 2. 如果资金足够，再逐一检查每种物资
             foreach (BuildRequirement req in objectData.materialRequirements)
             {
-                // 使用我们新的仓库查询方法！
                 if (ResourceManager.Instance.GetWarehouseStock(req.item) < req.amount)
                 {
                     requirementsMet = false;
-                    break; // 一旦有任何一种物资不足，就立刻停止检查
+                    break;
                 }
             }
         }
 
         isAvailable = requirementsMet;
-
         UpdateAvailabilityUI();
     }
 
     private void HandleBuildingsChanged()
     {
-        ObjectData objectData = DatabaseManager.Instance.databaseSO.objectsData[databaseItemID];
+        ObjectData objectData = DatabaseManager.Instance.databaseSO.GetObjectByID(databaseItemID);
 
         foreach (BuildingType dependency in objectData.buildDependency)
         {
@@ -103,7 +113,6 @@ public class BuySlot : MonoBehaviour
                 return;
             }
         }
-
         gameObject.SetActive(true);
     }
 }

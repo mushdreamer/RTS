@@ -1,17 +1,21 @@
+// Factory.cs - Final Version with Interface
 using UnityEngine;
 
-public class Factory : MonoBehaviour, IEnergyConsumer
+public class Factory : MonoBehaviour, IEnergyConsumer, IActivatableBuilding // Implements the interface
 {
     [Tooltip("工厂运转需要的电量")]
-    public float powerRequirement = 15f; // 对应你之前 PowerUser 中的 consumingPower
+    public float powerRequirement = 15f;
 
-    // 实现接口
-    public float RequestedPower { get { return powerRequirement; } }
+    public float RequestedPower => powerRequirement;
     public bool IsPowered { get; private set; }
+
+    public void Activate(Vector3Int gridPosition)
+    {
+        this.enabled = true;
+    }
 
     public void SupplyPower(float suppliedAmount)
     {
-        // 如果获得的电力大于等于我们需要的电力，则设备正常工作
         IsPowered = (suppliedAmount >= powerRequirement);
     }
 
@@ -24,5 +28,4 @@ public class Factory : MonoBehaviour, IEnergyConsumer
     {
         EnergyGridManager.Instance?.UnregisterConsumer(this);
     }
-
 }

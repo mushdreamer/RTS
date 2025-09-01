@@ -63,6 +63,9 @@ public class AirQualityManager : MonoBehaviour
     {
         currentCO2 += amount;
         UpdateAirQualityLevel();
+
+        // ▼▼▼ 添加下面这行代码 ▼▼▼
+        Debug.Log($"接收到CO2，当前总量: {currentCO2}");
     }
 
     /// <summary>

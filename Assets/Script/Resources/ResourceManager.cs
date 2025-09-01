@@ -1,4 +1,4 @@
-// ResourceManager.cs - 修正版本
+// ResourceManager.cs - 修正扣款逻辑版
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -20,43 +20,65 @@ public class ResourceManager : MonoBehaviour
         }
     }
 
-    // --- 信用点（Credits）管理 ---
-    private int credits = 60; // 用于建造的信用点
+    private int credits = 60;
     public TextMeshProUGUI creditsUI;
     public enum ResourcesType
     {
         Credits
     }
 
-    // --- Anno风格的物品库存 ---
     private Dictionary<ItemData, float> _itemStock = new Dictionary<ItemData, float>();
-
-    // --- 事件和系统引用 ---
-    public event Action OnResourceChanged; // 用于信用点和物品库存变化
+    public event Action OnResourceChanged;
     public event Action OnBuildingsChanged;
     public List<BuildingType> allExistingBuildings;
     public PlacementSystem placementSystem;
 
-    // ▼▼▼【修正部分】▼▼▼
-    // --- 经济系统 (银行与资金) ---
-    [Header("经济系统 (银行与资金)")]
-    [SerializeField] private float money = 1000f; // 初始资金，用于科研等
-    public float Money => money; // 公开的只读属性，用于访问资金
+    [Header("Econ Sys(Bank and Funding)")]
+    [SerializeField] private float money = 1000f;
+    public float Money => money;
 
     [SerializeField] private bool bankExists = false;
-    public bool BankExists => bankExists; // 公开的只读属性
+    public bool BankExists => bankExists;
 
-    // 资金变化事件
     public event Action<float> OnMoneyChanged;
-    // ▲▲▲【修正部分结束】▲▲▲
-
 
     private void Start()
     {
-        UpdateUI();
-        // 首次启动时，手动触发一次资金UI更新
         OnMoneyChanged?.Invoke(money);
     }
+
+    private void OnEnable()
+    {
+        OnMoneyChanged += UpdateMoneyUI;
+    }
+
+    private void OnDisable()
+    {
+        OnMoneyChanged -= UpdateMoneyUI;
+    }
+
+    private void UpdateMoneyUI(float newAmount)
+    {
+        if (creditsUI != null)
+        {
+            creditsUI.text = $"{newAmount:F0}";
+        }
+    }
+
+    // --- 【核心修改点】---
+    internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
+    {
+        // 1. 【修改】不再减少旧的 credits，而是调用 TrySpendMoney 减少 Money
+        TrySpendMoney(objectData.creditCost);
+
+        // 2. 扣除材料的部分保持不变
+        foreach (BuildRequirement req in objectData.materialRequirements)
+        {
+            TryConsumeWarehouseItem(req.item, req.amount);
+        }
+    }
+
+    // --- 其他方法保持不变 ---
 
     public void UpdateBuildingChanged(BuildingType buildingType, bool isNew, Vector3 position)
     {
@@ -85,18 +107,8 @@ public class ResourceManager : MonoBehaviour
                 break;
             }
         }
-        int amountToReturn = (int)(sellingPrice * 0.50f);
-        IncreaseResource(ResourcesType.Credits, amountToReturn);
-    }
-
-    internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
-    {
-        DecreaseResource(ResourcesType.Credits, objectData.creditCost);
-
-        foreach (BuildRequirement req in objectData.materialRequirements)
-        {
-            TryConsumeWarehouseItem(req.item, req.amount);
-        }
+        // 出售建筑时，我们返还 Money 而不是 credits
+        AddMoney(sellingPrice * 0.5f);
     }
 
     public void IncreaseResource(ResourcesType resource, int amountToIncrease)
@@ -145,43 +157,29 @@ public class ResourceManager : MonoBehaviour
         return _itemStock.ContainsKey(item) ? _itemStock[item] : 0;
     }
 
-    private void UpdateUI()
-    {
-        creditsUI.text = $"{credits}";
-    }
-
     public int GetCredits()
     {
         return credits;
-    }
-
-    private void OnEnable()
-    {
-        OnResourceChanged += UpdateUI;
-    }
-    private void OnDisable()
-    {
-        OnResourceChanged -= UpdateUI;
     }
 
     #region Bank and Money System
 
     public void RegisterBank()
     {
-        bankExists = true; // 【修正】现在修改私有字段
+        bankExists = true;
         Debug.Log("Bank has been built. Profits will now be collected.");
     }
 
     public void UnregisterBank()
     {
-        bankExists = false; // 【修正】现在修改私有字段
+        bankExists = false;
         Debug.Log("Bank has been destroyed. Profits will no longer be collected.");
     }
 
     public void AddMoney(float amount)
     {
         if (amount <= 0) return;
-        money += amount; // 【修正】现在修改私有字段
+        money += amount;
         OnMoneyChanged?.Invoke(money);
     }
 
@@ -189,17 +187,11 @@ public class ResourceManager : MonoBehaviour
     {
         if (money >= amount)
         {
-            money -= amount; // 【修正】现在修改私有字段
+            money -= amount;
             OnMoneyChanged?.Invoke(money);
             return true;
         }
         return false;
     }
-
     #endregion
-
-    void Update()
-    {
-
-    }
 }

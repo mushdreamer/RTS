@@ -198,6 +198,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a1d8518716c2c3a4d9e4cfaaa66de741, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  constHealth: 0
   constMaxHealth: 100
   healthTracker: {fileID: 3241080568378500257}
   isEnemy: 0
@@ -243,7 +244,7 @@ MonoBehaviour:
   maxProduction: 100
   powerRadius: 30
   maxTowerConnections: 5
-  co2EmissionPerSecond: 2
+  co2EmissionPerSecond: 60
 --- !u!1 &3668304174304110648
 GameObject:
   m_ObjectHideFlags: 0
