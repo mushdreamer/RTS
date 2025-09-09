@@ -47,6 +47,8 @@ public class House : MonoBehaviour, IActivatableBuilding // Implements the inter
 
     private void InitializeNeeds()
     {
+        Debug.Log($"为 {gameObject.name} 初始化需求列表...", this.gameObject);
+
         trackedNeeds = new List<HouseNeedState>();
         if (currentTier != null && currentTier.needs != null)
         {
