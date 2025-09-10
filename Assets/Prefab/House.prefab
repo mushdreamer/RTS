@@ -13,6 +13,11 @@ PrefabInstance:
       propertyPath: buildingType
       value: 2
       objectReference: {fileID: 0}
+    - target: {fileID: 2373723960874772588, guid: 163099117d8b97a4bb83120a495b01f9,
+        type: 3}
+      propertyPath: m_Enabled
+      value: 1
+      objectReference: {fileID: 0}
     - target: {fileID: 4870010141513049078, guid: 163099117d8b97a4bb83120a495b01f9,
         type: 3}
       propertyPath: m_Name

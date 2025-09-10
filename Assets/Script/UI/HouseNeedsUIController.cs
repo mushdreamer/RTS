@@ -20,6 +20,8 @@ public class HouseNeedsUIController : MonoBehaviour
 
     public void ShowNeedsForHouse(House selectedHouse)
     {
+        Debug.Log($"[时刻 B - UIController] 准备为房屋创建UI。读取到列表中项目数量: {selectedHouse.trackedNeeds.Count}");
+
         mainPanel.SetActive(true);
 
         foreach (Transform child in needsContainer)

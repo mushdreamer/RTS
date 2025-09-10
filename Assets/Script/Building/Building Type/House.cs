@@ -57,6 +57,8 @@ public class House : MonoBehaviour, IActivatableBuilding // Implements the inter
                 trackedNeeds.Add(new HouseNeedState(need));
             }
         }
+
+        Debug.Log($"[时刻 A - House.cs] 需求列表初始化完成。列表中项目数量: {trackedNeeds.Count}");
     }
 
     public void RecalculateState()
