@@ -1,4 +1,4 @@
-// ResourceManager.cs - 修正扣款逻辑版
+// ResourceManager.cs - 最终完整版
 using System;
 using System.Collections.Generic;
 using TMPro;
@@ -10,41 +10,40 @@ public class ResourceManager : MonoBehaviour
 
     private void Awake()
     {
-        if (Instance != null && Instance != this)
-        {
-            Destroy(gameObject);
-        }
-        else
-        {
-            Instance = this;
-        }
+        if (Instance != null && Instance != this) { Destroy(gameObject); }
+        else { Instance = this; }
     }
 
-    private int credits = 60;
+    // --- UI 控制 ---
     public TextMeshProUGUI creditsUI;
-    public enum ResourcesType
-    {
-        Credits
-    }
 
+    // --- 内部变量 ---
+    private int credits = 60; // 旧的信用点系统，后台保留
     private Dictionary<ItemData, float> _itemStock = new Dictionary<ItemData, float>();
+    private int activeBankCount = 0; // 用于追踪当前银行的数量
+
+    // --- 事件 ---
     public event Action OnResourceChanged;
     public event Action OnBuildingsChanged;
+    public event Action<float> OnMoneyChanged;
+
+    // --- 游戏逻辑引用 ---
     public List<BuildingType> allExistingBuildings;
     public PlacementSystem placementSystem;
 
-    [Header("Econ Sys(Bank and Funding)")]
+    [Header("经济系统 (银行与资金)")]
     [SerializeField] private float money = 1000f;
     public float Money => money;
-
     [SerializeField] private bool bankExists = false;
     public bool BankExists => bankExists;
 
-    public event Action<float> OnMoneyChanged;
-
     private void Start()
     {
-        OnMoneyChanged?.Invoke(money);
+        // 游戏开始时，直接禁用文本组件，让它不显示
+        if (creditsUI != null)
+        {
+            creditsUI.enabled = false;
+        }
     }
 
     private void OnEnable()
@@ -61,31 +60,54 @@ public class ResourceManager : MonoBehaviour
     {
         if (creditsUI != null)
         {
-            creditsUI.text = $"{newAmount:F0}";
+            creditsUI.text = $"资金: {newAmount:F0}";
         }
     }
 
-    // --- 【核心修改点】---
+    public void RegisterBank()
+    {
+        activeBankCount++;
+        bankExists = true;
+
+        // 只要有银行存在，就启用文本组件
+        if (creditsUI != null && !creditsUI.enabled)
+        {
+            creditsUI.enabled = true;
+            // 首次显示时，立即更新一次文本内容
+            UpdateMoneyUI(this.money);
+        }
+    }
+
+    public void UnregisterBank()
+    {
+        activeBankCount--;
+        // 如果最后一个银行也被摧毁了
+        if (activeBankCount <= 0)
+        {
+            activeBankCount = 0; // 防止负数
+            bankExists = false;
+            // 禁用文本组件，让它再次消失
+            if (creditsUI != null)
+            {
+                creditsUI.enabled = false;
+            }
+        }
+    }
+
     internal void DecreaseResourcesBasedOnRequirement(ObjectData objectData)
     {
-        // 1. 【修改】不再减少旧的 credits，而是调用 TrySpendMoney 减少 Money
         TrySpendMoney(objectData.creditCost);
-
-        // 2. 扣除材料的部分保持不变
         foreach (BuildRequirement req in objectData.materialRequirements)
         {
             TryConsumeWarehouseItem(req.item, req.amount);
         }
     }
 
-    // --- 其他方法保持不变 ---
-
     public void UpdateBuildingChanged(BuildingType buildingType, bool isNew, Vector3 position)
     {
         if (isNew)
         {
             allExistingBuildings.Add(buildingType);
-            SoundManager.Instance.PlayBuildingConstructionSound();
         }
         else
         {
@@ -97,7 +119,6 @@ public class ResourceManager : MonoBehaviour
 
     public void SellBuilding(BuildingType buildingType)
     {
-        SoundManager.Instance.PlayBuildingSellingSound();
         var sellingPrice = 0;
         foreach (ObjectData obj in DatabaseManager.Instance.databaseSO.objectsData)
         {
@@ -107,7 +128,6 @@ public class ResourceManager : MonoBehaviour
                 break;
             }
         }
-        // 出售建筑时，我们返还 Money 而不是 credits
         AddMoney(sellingPrice * 0.5f);
     }
 
@@ -162,20 +182,6 @@ public class ResourceManager : MonoBehaviour
         return credits;
     }
 
-    #region Bank and Money System
-
-    public void RegisterBank()
-    {
-        bankExists = true;
-        Debug.Log("Bank has been built. Profits will now be collected.");
-    }
-
-    public void UnregisterBank()
-    {
-        bankExists = false;
-        Debug.Log("Bank has been destroyed. Profits will no longer be collected.");
-    }
-
     public void AddMoney(float amount)
     {
         if (amount <= 0) return;
@@ -193,5 +199,9 @@ public class ResourceManager : MonoBehaviour
         }
         return false;
     }
-    #endregion
+
+    public enum ResourcesType
+    {
+        Credits
+    }
 }
